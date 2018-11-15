@@ -313,13 +313,52 @@ animationSet = new AnimationSet(true);
 ...
 ```
 
-
-
 ![combined_java](/Users/aaron_dbj/Blog/BlogPictures/combined_java.gif)
 
+不知道大家注意到没有，同样都是这4种变化的组合，怎么最后呈现的效果就不一样呢？我测试发现，这4种变换的执行顺序不一样，注意是**反序**的，也就是代码中顺序在前的反而后执行。就拿旋转和平移的组合动画来说，如果在代码中是先旋转后平移，那么实际效果就是先平移后旋转。看看图就清楚了。
 
+代码顺序：先rotate再translate
 
+```java
+ImageView imageView;
+...
+animationSet = new AnimationSet(true);
+TranslateAnimation translateAnimation = new TranslateAnimation(
+                0, 400, 0, 0
+);
+RotateAnimation rotateAnimation = new RotateAnimation
+		0, 1000, Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+);
+animationSet.addAnimation(rotateAnimation);
+animationSet.addAnimation(translateAnimation);        
+imageView.startAnimation();
+...
+```
 
+![translate_rotate](/Users/aaron_dbj/Blog/BlogPictures/translate_rotate.gif)
+
+代码顺序：先translate后rotate
+
+```java
+ImageView imageView;
+...
+animationSet = new AnimationSet(true);
+TranslateAnimation translateAnimation = new TranslateAnimation(
+                0, 400, 0, 0
+);
+RotateAnimation rotateAnimation = new RotateAnimation
+		0, 1000, Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+);
+animationSet.addAnimation(translateAnimation);        animationSet.addAnimation(rotateAnimation);
+imageView.startAnimation();
+...
+```
+
+![rotate_translate](/Users/aaron_dbj/Blog/BlogPictures/rotate_translate.gif)
+
+最后还有一个注意的点，就是在new AnimationSet(boolean shareInterpolator)对象时，有一个boolean类型的参数，它的意思是是否为整个组合动画是指一个共用的插值器，还是各个变化分别设置自己的插值器。如果设置为true，各个变化再设置自己的插值器就不起作用。
 
 补间动画就先讲到这里，由于本人知识水平有限，如有错误和疏漏之处还望指正。
 
