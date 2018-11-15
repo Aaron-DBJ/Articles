@@ -226,6 +226,99 @@ imageView.startAnimation(animation);
 
 使用方法和前3者都一样，不废话了。
 
+## 3、组合动画
+
+前面我们实现的都是比较单一的变化，如果都是这样的动画效果也太low了；好在Android给我们提供了组合动画的方式，将者4种基本变换进行自由组合，就能得到更多更丰富的动画效果。
+
+组合动画的实现方式和各个单一动画的实现方式相同，都可以用xml资源文件或者java代码实现。下面我们还是一个一个的说。
+
+1、xml文件方式
+
+首先还是在res/anim文件夹下面新建一个xml文件，唯一不同的是此时的根标签是<set></set>了。也很好理解，集合嘛，把各种单一变化添加到这个集合就成了组合动画。
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android">
+    <alpha
+        android:fromAlpha="0.1"
+        android:toAlpha="1"
+        android:duration="2000"
+        />
+    <scale
+        android:fromYScale="0.1"
+        android:fromXScale="0.1"
+        android:toYScale="1.5"
+        android:toXScale="1.5"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:duration="2000"
+        />
+    <translate
+        android:fromXDelta="0"
+        android:toXDelta="350"
+        android:fromYDelta="0"
+        android:toYDelta="0"
+        android:duration="2000"
+        />
+    <rotate
+        android:fromDegrees="0"
+        android:toDegrees="1000"
+        android:duration="2000"
+        android:pivotY="50%"
+        android:pivotX="50%"
+        />
+</set>
+```
+
+如上面代码所示，在xml文件中定义各种动画。然后在java中用下列代码调用。
+
+```java
+ImageView imageView;
+...
+Animation animation = AnimationUtils.loadAnimation(this, R.anim.combined_anim);
+imageView.startAnimation();
+...
+```
+
+![combined](/Users/aaron_dbj/Blog/BlogPictures/combined.gif)
+
+2、java代码实现
+
+在Android中组合动画对应的类是AnimationSet，上面我们讲过每种变化都有其对应的类，比如AlphaAnimation、ScaleAnimation、TranslateAnimation和AlphaAnimation。具体实现方式就是创建一个AnimationSet对象，然后分别创建上述四种对象，调用addAnimation方法将对象添加到AnimationSet对象中，然后开始动画即可。说起有些拗口，但一看代码便懂。
+
+```java
+ImageView imageView;
+AnimationSet animationSet;
+...
+animationSet = new AnimationSet(true);
+        AlphaAnimation alphaAnimation = new AlphaAnimation(0.1f, 1);
+        ScaleAnimation scaleAnimation = new ScaleAnimation(0.1f, 1.5f,
+                0.1f, 1.5f, Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f);
+        TranslateAnimation translateAnimation = new TranslateAnimation(
+                0, 400, 0, 0
+        );
+        RotateAnimation rotateAnimation = new RotateAnimation(
+                0, 1000, Animation.RELATIVE_TO_SELF, 0.5f,
+                Animation.RELATIVE_TO_SELF, 0.5f
+        );
+
+        animationSet.addAnimation(alphaAnimation);
+        animationSet.addAnimation(scaleAnimation);
+        animationSet.addAnimation(rotateAnimation);
+        animationSet.addAnimation(translateAnimation);
+        animationSet.setDuration(2000);
+
+		imageView.startAnimation();
+...
+```
+
+
+
+![combined_java](/Users/aaron_dbj/Blog/BlogPictures/combined_java.gif)
+
+
+
 
 
 补间动画就先讲到这里，由于本人知识水平有限，如有错误和疏漏之处还望指正。
