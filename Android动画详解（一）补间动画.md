@@ -173,7 +173,7 @@ imageView.startAnimation(animation);
 
 使用时：
 
-```Java
+```java
 ImageView imageView;
 ...
 Animation animation = new RotateAnimation(0, 500, Animation.RELATIVE_TO_SELF, 0.5f,
