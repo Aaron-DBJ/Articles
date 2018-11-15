@@ -44,6 +44,8 @@ Animation有两种使用方式，一是xml资源文件方式来实现动画；�
 </alpha>
 ```
 
+![渐变动画](C:\Users\jenny\Pictures\BlogPictures\alpha.gif)
+
 （2）平移动画
 
 ```xml
@@ -55,6 +57,10 @@ Animation有两种使用方式，一是xml资源文件方式来实现动画；�
     android:duration="1500">
 </translate>
 ```
+
+![渐变动画](C:\Users\jenny\Pictures\BlogPictures\translate.gif)
+
+
 
 （3）旋转动画
 
@@ -70,6 +76,16 @@ Animation有两种使用方式，一是xml资源文件方式来实现动画；�
     >
 </rotate>
 ```
+
+![渐变动画](C:\Users\jenny\Pictures\BlogPictures\rotate.gif)
+
+上图是将pivotX和pivotY设置为50%。即控件中心点为缩放的起始位置。如果设为其他值看看是什么效果，下图是设置为20%的效果。
+
+![渐变动画](C:\Users\jenny\Pictures\BlogPictures\pivot20%.gif)
+
+不设置fillbefore和fillafter属性默认情况是动画结束后控件就会回到初始状态，如果设置了fillAfter为true，那么就会保留动画结束时的状态，如下图：
+
+![android:fillAfter="true"](C:\Users\jenny\Pictures\BlogPictures\fillAfter.gif)
 
 （4）缩放动画
 
@@ -87,6 +103,10 @@ Animation有两种使用方式，一是xml资源文件方式来实现动画；�
     >
 </scale>
 ```
+
+![渐变动画](C:\Users\jenny\Pictures\BlogPictures\scale.gif)
+
+
 
 定义好了xml资源文件后，在Android代码中定义Animation对象，使用AnimationUtils.loadAnimation方法将xml文件加载到Animation对象，然后控件调用startAnimation方法来实现动画效果。
 
@@ -164,10 +184,10 @@ imageView.startAnimation(animation);
 
 虽说着四种动画的实现方式及其类似，但还是有些许不同。不同之处在上面的构造函数中就出来了，旋转动画中多了几个参数:
 
-- **pivotXType**
-- **pivotXValue**
-- **pivotYType**
-- **pivotYValue**
+- *pivotXType*
+- *pivotXValue*
+- *pivotYType*
+- *pivotYValue*
 
 其实这几个参数也不是新东西，前面讲过变化的起点坐标pivotX和pivotY，它们各有三种取值，数值，百分数和百分数p。所以pivotXType和pivotYType就代表这3中取值，在Java代码中，这3中类型分别是：Animation.ABSOLUTE、Animation.RELATIVE_TO_SELF和Animation.RELATIVE_TO_PARENT，这里你就知道百分数p的这个「p」代表parent了。
 
@@ -205,3 +225,15 @@ imageView.startAnimation(animation);
 | `TranslateAnimation(int fromXType, float fromXValue, int toXType, float toXValue, int fromYType, float fromYValue, int toYType, float toYValue)` |
 
 使用方法和前3者都一样，不废话了。
+
+
+
+补间动画就先讲到这里，由于本人知识水平有限，如有错误和疏漏之处还望指正。
+
+## 示例代码
+
+[示例代码](https://github.com/Aaron-DBJ/MyView)
+
+## 参考资料
+
+[自定义控件三部曲之动画篇（三）—— 代码生成alpha、scale、translate、rotate、set及插值器动画](https://blog.csdn.net/harvic880925/article/details/40117115)
