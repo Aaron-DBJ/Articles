@@ -4,7 +4,7 @@
 
 在[RecyclerView进阶（一）之分割线、添加Header和Footer](https://blog.csdn.net/qq_21830869/article/details/85126443)展示过一个类似微信通讯录的粘性头部效果。
 
-![粘性头部效果](C:\Users\jenny\Pictures\BlogPictures\stiky_header_decoration2.gif)
+![粘性头部效果](https://github.com/Aaron-DBJ/MyItemDecoration/tree/master/Images/stiky_header_decoration2.gif)
 
 这篇文章就来实现一下这个效果。
 
@@ -217,7 +217,7 @@ private String[] provinces = {"四川省", "河南省", "江苏省", "山东省"
 
 这样就基本实现了一个带分组的列表界面了，看下运行结果：
 
-![](C:\Users\jenny\Pictures\BlogPictures\header_rect.gif)
+![](https://github.com/Aaron-DBJ/MyItemDecoration/tree/master/Images/header_rect.gif)
 
 ## 粘性头部分组栏
 
