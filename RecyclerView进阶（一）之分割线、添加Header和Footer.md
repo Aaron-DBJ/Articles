@@ -330,7 +330,7 @@ public class HeaderFooterAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
 ### Header和Footer扩展
 
-上面我们添加了头部视图和底部视图，但只是加载了一个简单的界面，我们也没给它绑定数据，其实header和footer也是itemview，那么itemview能做到的事，header和footer一样能完成。比如最开始的那张动态图，header就被设置成了一个轮播图，这也是很多APP上常见的布局。下面我们就来做做把header设置为一个轮播图。重复代码就不写了，只把新增的代码写下来，因为结构没变，只是添加一些代码内容。轮播图github上很多API，随便找一个就行。
+上面我们添加了头部视图和底部视图，但只是加载了一个简单的界面，我们也没给它绑定数据，其实header和footer也是itemview，那么itemview能做到的事，header和footer一样能完成。比如最开始的那张动态图，header就被设置成了一个轮播图，这也是很多APP上常见的布局。下面我们就来做做把header设置为一个轮播图。重复代码就不写了，只把新增的代码写下来，因为结构没变，只是添加一些代码内容。轮播图在github上很多相应的API，随便找一个就行。
 
 首先还是header和footer的布局文件。去掉header.xml中的`TextView`，添加录播图。
 
@@ -443,5 +443,7 @@ public class HeaderFooterAdapter extends RecyclerView.Adapter<RecyclerView.ViewH
 
 
 由于个人水平有限，如有错误和纰漏之处，还望不吝指教。
+
+具体请看：[完整代码](https://github.com/Aaron-DBJ/MyItemDecoration)
 
 [^1]: 图片引用自[层级图](http://www.jcodecraeer.com/a/anzhuokaifa/2017/0615/8079.html)，侵删
