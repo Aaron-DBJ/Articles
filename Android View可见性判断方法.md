@@ -1,3 +1,5 @@
+[toc]
+
 在Android开发过程中，经常需要获取Window或某个View的可见性变化时机，以便在View的Visibility变化时进行相应的处理。目前，比较常用的判断View可见性时机的回调有
 
 - *onWindowVisibilityChanged*
