@@ -1068,7 +1068,7 @@ mBehavior.setPeekHeight(ScreenUtils.getScreenHeight(getContext()));
 ......
 ```
 
-**注意**：*BottomSheetBehavior.from*方法要求传入的*View*的*LayoutParams*必须是*CoordinatorLayout*的*LayoutParams。*但这不意味着我们创建的*View*的根布局是*CoordinatorLayout*，它会自动给我们包一层，这个下面会详述。
+**注意**：*BottomSheetBehavior.from*方法要求传入的*View*的*LayoutParams*必须是*CoordinatorLayout*的*LayoutParams。*但这不意味着我们创建的*View*的根布局就必须是*CoordinatorLayout*，它会自动给我们包一层，这个下面会详述。
 
 通过*BottomSheetBehavior*，我们可以添加一些滑动和*Fling*的监听事件，或者设置*BottomSheetDialogFragment*打开时的初始高度等。
 
@@ -1081,7 +1081,7 @@ java.lang.IllegalArgumentException: The view is not a child of CoordinatorLayout
         at com.google.android.material.bottomsheet.BottomSheetBehavior.from(BottomSheetBehavior.java:1634)
 ```
 
-\2) 如果传入*view.getParent()*（**也就是前面提到过的*****BottomSheetDialogFragment*****会给我们的*****view*****包一层*****CoordinatorLayout的*****布局**），无论是在*onCreateView*或*onViewCreated*生命周期方法中去创建*BottomSheetBehavior*对象，会报错并提示
+2）如果传入*view.getParent()*（**也就是前面提到过的BottomSheetDialogFragment会给我们的view包一层CoordinatorLayout的布局**），无论是在*onCreateView*或*onViewCreated*生命周期方法中去创建*BottomSheetBehavior*对象，会报错并提示
 
 ```java
 java.lang.NullPointerException: Attempt to invoke virtual method 'android.view.ViewGroup$LayoutParams android.view.View.getLayoutParams()' on a null object reference

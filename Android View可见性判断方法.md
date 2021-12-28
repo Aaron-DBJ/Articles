@@ -26,7 +26,10 @@
 
 由方法注释可知，它是在窗口可见性改变时调用，而且注意这只是在*Window*对*WindowManager*可见时调用，并不是告知你当前可见的*Window*是否被遮挡。
 
-<span id="1">查看代码</span>，发现其调用位置有**3**处，添加时在`performTraversals`方法中(代码有省略)，*Activity* *onStop*生命周期会*remove*掉*DecorView*和对应的*Window*，在`removeView`方法中会调用`dispatchDetachedFromWindow`方法，该方法内又会调用`onWindowVisibilityChanged`
+<span id="1">查看代码</span>，发现其调用位置有**3**处：
+
+- 添加时在`performTraversals`方法中(代码有省略)
+- *Activity* *onStop*生命周期会*remove*掉*DecorView*和对应的*Window*，在`removeView`方法中会调用`dispatchDetachedFromWindow`方法，该方法内又会调用`onWindowVisibilityChanged`
 
 ```java
 private void performTraversals() {
@@ -232,6 +235,19 @@ mAttachInfo.mWindowVisibility = viewVisibility;
 ```
 
 在*Window*被添加到屏幕上后(*mWindowSession.addToDisplay*)，`getHostVisibility()`就返回`Visible`。所以只要`mWindowVisibility`不为`GONE`就会调用`onWindowVisibilityChanged`方法。这就是它的第一种调用场景。
+
+查看*getHostVisibility()*方法
+
+```java
+// #ViewRootImpl.java
+int getHostVisibility() {
+        return (mAppVisible || mForceDecorViewVisibility) ? mView.getVisibility() : View.GONE;
+    }
+```
+
+可见，最终取得的是*mView*对象的可见性，而*mView*对象就是*DecorView*对象(在*ViewrootImpl#setView*方法中设置的)，所以：
+
+**`mWindowVisibility`方法只会在页面（Activity和Dialog）打开和关闭（具体说是*Activity*或*Dialog*的*Window*可见性改变时）各调用一次**
 
 第二处调用位置在[②](#1)处，主要代码是
 
