@@ -1,3 +1,5 @@
+[toc]
+
 # 一、前言
 
 众所周知，*Android*中是通过*WindowManger*来添加、删除和更新视图，也就是*WindowManager*提供的`addView`、`removeView`和`updateViewLayout`方法。但是在添加或移除*View*的代码逻辑是啥，在这期间做了哪些工作，调用`removeView`方法就真的立刻删除*view*了吗？本文正是针对这些问题，对相关系统源码做了一次梳理和分析。作为一次学习源码过程，希望对相关知识点做到既能用，也明白底层原理。
