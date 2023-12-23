@@ -16,7 +16,6 @@ Android Gradle打包配置
 
 **配置了Build Type后，Gradle也会默认指定一个同名的目录在项目里面，但是不会把目录自动创建出来，我们可以手动创建一个同名的目录**。
 
-
 <details> <summary>build Type示例</summary>
 <pre>
 <code>
@@ -30,18 +29,6 @@ buildTypes {
             debuggable false
             multiDexEnabled true
         }
-
-        debug {
-            //noinspection GroovyAssignabilityCheck
-            signingConfig signingConfigs.debugConfig
-            multiDexEnabled true
-        }
-}
-...
-</code>
-</pre>
-</details>
-
 
 ## *Product flavors*（产品变种）
 
@@ -120,10 +107,83 @@ android {
 
 创建Android新项目时，Android Studio 会自动创建其中的部分文件（如图 1 所示），并为其填充默认值。
 
-![](/Users/mtdp/Library/Application%20Support/marktext/images/2023-12-22-18-47-42-image.png)
+<img src="https://raw.githubusercontent.com/Aaron-DBJ/ImageRepo/img/pics/ad905365-06e7-409b-b4a9-c6ee53fa4051.png" title="" alt="" width="442">
 
 Android项目里有些默认的Build配置文件，在构建前，需要了解其作用和用法。
 
 ## The Gradle Wrapper file
+
+Gradle wrapper (`gradlew`) 是一个包含在源代码中的小型应用，用于下载和启动 Gradle 本身。这可以创建更一致的构建执行。开发者下载应用源代码并运行 `gradlew`。这将下载所需的 Gradle 发行版，并启动 Gradle 以构建应用。
+
+`gradle/wrapper/gradle-wrapper.properties` 文件包含一个属性 `distributionUrl`，该属性描述了用于运行 build 的 Gradle 版本。
+
+<details><summary>gradle wrapper示例</summary>
+<pre><code>
+    distributionBase=GRADLE_USER_HOME
+distributionPath=wrapper/dists
+distributionUrl=https\://services.gradle.org/distributions/gradle-8.0-bin.zip
+zipStoreBase=GRADLE_USER_HOME
+zipStorePath=wrapper/dists
+</code></pre>
+</details>
+
+## Gradle settings file
+
+`settings.gradle.kts` 文件（对应 Kotlin DSL）或 `settings.gradle` 文件（对应 Groovy DSL）位于项目的根目录下。此设置文件会定义项目级代码库设置，并告知 Gradle 在构建应用时应将哪些模块包含在内。多模块项目需要指定应包含在最终 build 中的每个模块。
+
+# Source sets
+
+这个对我们打包构建非常有帮助，尤其是我们只想针对某个build type添加一些代码逻辑，打该build type的APP时包含对应代码，其他build type不含该代码。
+
+Android studio是以source set来组织源代码和资源的。当你创建一个新*module*，Android studio会自动在该module内创建一个名为`main/`的source set。**一个*module*中的`main/`**
+
+**目录下所包含的源代码和资源，在编译打包时会被所有的变体（build variant）所使用**。即无论打包选择什么变体，`main/`目录下文件都会参与打包。
+
+除了必选的`main/` source set，其他的source set是可选的，而且在配置新的变体的时候Android studio不会自动创建这些source set。当然，就像`main/`一样，可以手动创建其他source set，Gradle构建某个版本（这里版本指不同变体、构建类型和产品变种）的APP时，会用到对应的source set所包含的源代码和资源。
+
+## source set分类
+
+- `src/main/`：无论构建哪个变体，该目录下的源代码和资源都会被使用到。
+
+- `src/buildType/`：只会在构建对应build type的APP时，会使用这个目录下的代码和资源
+
+- `src/productFlavor/`：只会在构建对应product flavor的APP时，会使用这个目录下的代码和资源
+
+- `src/productFlavorBuildType`/：只会在构建对应变体的APP时，会使用这个目录下的代码和资源
+
+例如，如果要构建`fullDebug`（有2个build type，分别为release和debug；2个product flavor，分别为full和free）变体的APP，构建系统将会合并下列目录里的源代码、配置和资源：
+
+- `src/fullDebug/` (the build variant source set)
+- `src/debug/` (the build type source set)
+- `src/full/` (the product flavor source set)
+- `src/main/` (the main source set)
+
+**构建变体的时候，会用到变体本身对应的目录，build type对应的目录，product flavor对应的目录，以及无论什么变体都会使用的main目录**。
+
+## 合并优先级
+
+上文说明了构建变体时参与的目录，这么多目录中可能包含相同的文件，需要规定好合并时的优先级，才能最终确定构建的APP中使用的是哪个目录的文件。
+
+1. 源代码合并
+   
+   `kotlin/` 或 `java/` 目录中的所有源代码将一起编译以生成单个输出。对于给定的 build 变体，如果 Gradle 遇到两个或更多个源代码集目录定义了同一个 Kotlin 或 Java 类的情况，就会抛出构建错误（duplicate class）。所以**参与构建的所有source set中源代码文件不允许重复**，否则会报错。
+
+2. Manifest文件
+   
+   所有的Manifest文件最终会合并成一个Manifest文件。优先级是：
+   
+   **变体的Manifest（变体Manifest > 构建类型Manifest > 产品变种Manifest） > 工程的Manifest > 组件库的Manifest**
+
+3.  `values/`下的资源文件
+   
+   同名资源文件合并时
+   
+   **合并优先级：build variant > build type > product flavor > main**
+
+4. `res/` 和 `asset/`下的资源文件
+   
+   同名资源文件合并时
+   
+   **合并优先级：build variant > build type > product flavor > main**
 
 
