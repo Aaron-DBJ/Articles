@@ -29,6 +29,7 @@ buildTypes {
             debuggable false
             multiDexEnabled true
         }
+
          debug {
             //noinspection GroovyAssignabilityCheck
             signingConfig signingConfigs.debugConfig
@@ -38,8 +39,6 @@ buildTypes {
 ...
 </code>
 </pre>
-</details>
-
 </details>
 
 ## *Product flavors*（产品变种）
@@ -119,7 +118,7 @@ android {
 
 创建Android新项目时，Android Studio 会自动创建其中的部分文件（如下图所示），并为其填充默认值。
 
-![](/Users/mtdp/Library/Application%20Support/marktext/images/2023-12-22-18-47-42-image.png)
+<img src="https://raw.githubusercontent.com/Aaron-DBJ/ImageRepo/img/pics/ad905365-06e7-409b-b4a9-c6ee53fa4051.png" title="" alt="" width="442">
 
 Android项目里有些默认的Build配置文件，在构建前，需要了解其作用和用法。
 
