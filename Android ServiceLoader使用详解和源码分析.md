@@ -26,11 +26,14 @@ A-->C
 
 # 二、使用方式
 
-ServiceLoader的使用流程遵循：**服务约定 -> 服务实现 -> 服务注册 -> 服务发现/使用。**
+*ServiceLoader*的使用流程遵循：**服务约定 -> 服务实现 -> 服务注册 -> 服务发现/使用。**
 
 首先约定几个概念名词，并且后文中，以这些名词行文。
 
-概念说明备注服务接口或（通常是）抽象类出于加载的目的，**服务由单一类型表示，即单一接口或抽象类**。 （可以使用具体类，但不建议这样做。）服务提供者服务（接口和抽象类）的具体实现。服务提供者可以以扩展形式引入，例如jar包；也可以通过将它们添加到应用程序的类路径或通过其他一些特定于平台的方式来提供。给定服务提供者包含一个或多个具体类，这些类使用特定于提供者的数据和代码扩展该服务类型。   此工具强制执行的唯一要求是**提供程序类必须具有零参数构造函数**，以便它们可以在加载期间实例化。
+| 概念       | 说明                                                         | 备注                                                         |
+| ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| 服务       | 接口或（通常是）抽象类                                       | 出于加载的目的，**服务由单一类型表示，即单一接口或抽象类**。 （可以使用具体类，但不建议这样做。 |
+| 服务提供者 | 服务（接口和抽象类）的具体实现。服务提供者可以以扩展形式引入，例如jar包；也可以通过将它们添加到应用程序的类路径或通过其他一些特定于平台的方式来提供。 | 给定服务提供者包含一个或多个具体类，这些类使用特定于提供者的数据和代码扩展该服务类型。   此工具强制执行的唯一要求是**提供程序类必须具有零参数构造函数**，以便它们可以在加载期间实例化。 |
 
 1. 服务约定
 
@@ -38,13 +41,13 @@ ServiceLoader的使用流程遵循：**服务约定 -> 服务实现 -> 服务注
 
 2. 服务实现
 
-   实现定义好的服务，由于ServiceLoader可以更方便不同组件间通信，高度解耦。所以更常见的场景是服务可能是定义在底层组件或引入jar包，在上层业务代码中具体实现。
+   实现定义好的服务，由于*ServiceLoader*可以更方便不同组件间通信，高度解耦。所以更常见的场景是服务可能是定义在底层组件或引入*jar*包，在上层业务代码中具体实现。
 
 3. 服务注册
 
    约定和实现了服务后，需要对服务进行注册，系统才能定位到该服务。注册方式是在java同级目录，创建一个**resources/META-INF/services**的目录，在该目录下，以服务的全限定名创建一个SPI描述文件。目录层级图如下：
 
-   ![img](https://km.sankuai.com/api/file/cdn/1025646312/1027749347?contentType=1&isNewContent=false&isNewContent=false)
+   ![image-20211228174829011](/Users/mtdp/Library/Application Support/typora-user-images/image-20211228174829011.png)
 
    有了该文件，**即可将服务提供者(接口实现类)的全限定名分行写入该文件，即完成服务注册**。
 
@@ -80,9 +83,14 @@ while(mIterator.hasNext()){
 
 # 三、代码逻辑
 
-ServiceLoader成员变量说明
+*ServiceLoader*成员变量说明
 
-字段类型说明serviceClass*<*S*>*ServiceLoader加载的接口或抽象类loaderClassLoader类加载器providersLinkedHashMap*<*String,S*>*缓存加载的接口或抽象类（即service对象）lookupIteratorLazyIterator迭代器
+| 字段           | 类型                        | 说明                                    |
+| -------------- | --------------------------- | --------------------------------------- |
+| service        | Class*<*S*>*                | ServiceLoader加载的接口或抽象类         |
+| loader         | ClassLoader                 | 类加载器                                |
+| providers      | LinkedHashMap*<*String,S*>* | 缓存加载的接口或抽象类（即service对象） |
+| lookupIterator | LazyIterator                | 迭代器                                  |
 
 ## 3.1、ServiceLoader的创建
 
@@ -120,13 +128,13 @@ ServiceLoader成员变量说明
     }
 ```
 
-可以看出ServiceLoader#load方法创建了ServiceLoader对象，并且初始化了service、loader对象（含义见上表）。同时调用了reload方法清空了缓存，并且创建了LazyIterator对象，用来遍历加载的服务。
+可以看出*ServiceLoader#load*方法创建了*ServiceLoader*对象，并且初始化了*service*、*loader*对象（含义见上表）。同时调用了`reload`方法清空了缓存，并且创建了*LazyIterator*对象，用来遍历加载的服务。
 
-**这个阶段发现只是做了初始化工作，但并没有加载注册的服务，所以这是一个懒加载过程**（LazyIterator的命名也透露了这点）。
+**这个阶段发现只是做了初始化工作，但并没有加载注册的服务，所以这是一个懒加载过程**（*LazyIterator*的命名也透露了这点）。
 
 ## 3.2、服务的注册
 
-3.1小节中说了*load*方法只是做了一些初始化的工作，并没有注册服务。那么服务具体是在什么位置进行注册的呢？在使用时，会获取ServiceLoader的迭代器来遍历服务，看下*ServiceLoader#iterator*方法：
+3.1小节中说了*load*方法只是做了一些初始化的工作，并没有注册服务。那么服务具体是在什么位置进行注册的呢？在使用时，会获取*ServiceLoader*的迭代器来遍历服务，看下*ServiceLoader#iterator*方法：
 
 ```java
 public Iterator<S> iterator() {
@@ -198,7 +206,7 @@ private class LazyIterator implements Iterator<S> {
 
 ①：判断nextName是否为null，表示下一个待注册服务的全称（目录路径+服务名），不为null表示有服务，直接返回true；否则继续执行
 
-②：*configs*保存所有指定名称的资源，在这里就是我们声明的**resources/META-INF/services/<package name>文件**。如果为null，表示还未加载该资源文件。
+②：*configs*保存所有指定名称的资源，在这里就是我们声明的**resources/META-INF/services/<package name>**文件。如果为*null*，表示还未加载该资源文件。
 
 ③：构造要加载的资源文件全名，*PREFIX*的值为：
 
@@ -210,9 +218,9 @@ private static final String PREFIX = "META-INF/services/";
 
 ④：如果注册成功了，*configs*变量就储存了所有声明的服务全名。**这一步才是真正注册了所有服务的位置，懒加载就是在这里进行的。**
 
-⑤：首次加载，*pending*迭代器对象为null，进入循环。如果*configs*里没有值，直接返回false，表明没有可注册的服务。否则进入⑥处
+⑤：首次加载，*pending*迭代器对象为*null*，进入循环。如果*configs*里没有值，直接返回false，表明没有可注册的服务。否则进入⑥处
 
-⑥：调用parse方法，它打开注册文件开始读取文件内容，每读到一行服务全名，如果它没有缓存过（即不在providers里）。就把它添加到一个列表中。直到文件内容全部读取完成，最后返回该列表的迭代器对象。
+⑥：调用*parse*方法，它打开注册文件开始读取文件内容，每读到一行服务全名，如果它没有缓存过（即不在*providers*里）。就把它添加到一个列表中。直到文件内容全部读取完成，最后返回该列表的迭代器对象。
 
 ```java
 private Iterator<String> parse(Class<?> service, URL u)
@@ -306,9 +314,9 @@ private int parseLine(Class<?> service, URL u, BufferedReader r, int lc,
 
 ①：没有服务，直接抛出异常
 
-②：根据服务的全限定名字加载其class对象。
+②：根据服务的全限定名字加载其*class*对象。
 
-③：调用newInstance创建服务的实例，并且将该实例类型装换成声明的服务类型（接口或抽象类）。
+③：调用*newInstance*创建服务的实例，并且将该实例类型装换成声明的服务类型（接口或抽象类）。
 
 ④：缓存一份，提升访问效率，避免每次都反射加载。
 
@@ -316,6 +324,6 @@ private int parseLine(Class<?> service, URL u, BufferedReader r, int lc,
 
 # 4、总结
 
-1、本文详细说明了SPI的概念和ServiceLoader的具体用法，其使用包括**服务约定 -> 服务实现 -> 服务注册 -> 服务发现/使用**等过程
+1、本文详细说明了*SPI*的概念和*ServiceLoader*的具体用法，其使用包括**服务约定 -> 服务实现 -> 服务注册 -> 服务发现/使用**等过程
 
-2、通过代码分析，说明了ServiceLoader的底层实现，包括服务注册的懒加载机制、服务注册为什么固定目录以及服务使用时的*hasNext()*和*next()*方法等。
+2、通过代码分析，说明了*ServiceLoader*的底层实现，包括服务注册的懒加载机制、服务注册为什么固定目录以及服务使用时的*hasNext()*和*next()*方法等。
