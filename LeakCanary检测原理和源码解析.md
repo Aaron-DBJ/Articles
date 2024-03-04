@@ -1,6 +1,6 @@
 # 一、引言
 
-内存泄露一直是Android开发中需要避免的问题，因此发现和定位内存泄露就是我们治理内存泄露问题的首要动作。目前市面上最流行的内存泄露排查组件非大名鼎鼎的***LeakCanary***莫属了，它能非常方便直观把内存泄漏处的引用链展示出来，有助于我们的快速定位。另外，其使用方式也十分简单友好。对于开发者而言，仅满足使用还是不够的，尽量知其所以然，于是就有了这篇源码的解析。
+内存泄露一直是Android开发中需要避免的问题，因此发现和定位内存泄露就是我们治理内存泄露问题的首要动作。目前市面上最流行的内存泄露排查组件非大名鼎鼎的**LeakCanary**莫属了，它能非常方便直观把内存泄漏处的引用链展示出来，有助于我们的快速定位。另外，其使用方式也十分简单友好。对于开发者而言，仅满足使用还是不够的，尽量知其所以然，于是就有了这篇源码的解析。
 
 # 二、使用和原理
 
@@ -102,7 +102,7 @@ public @NonNull RefWatcher buildAndInstall() {
 public static void install(@NonNull Context context, @NonNull RefWatcher refWatcher) {
     Application application = (Application) context.getApplicationContext();
     ActivityRefWatcher activityRefWatcher = new ActivityRefWatcher(application, refWatcher);
-	// ②.1
+    // ②.1
     application.registerActivityLifecycleCallbacks(activityRefWatcher.lifecycleCallbacks);
   }
 
@@ -122,7 +122,9 @@ public static void install(@NonNull Context context, @NonNull RefWatcher refWatc
 
 ③ 将创建的*RefWatcher*对象赋值给*LeakCanaryInternals.installedRefWatcher*对象
 
-## 3.3、检测逻辑入口`refWatcher.watch()`
+## 3.3、检测逻辑入口
+
+入口方法：**`refWatcher.watch()`**
 
 代码如下
 
@@ -147,7 +149,7 @@ public void watch(Object watchedReference, String referenceName) {
     // ③
     final KeyedWeakReference reference =
         new KeyedWeakReference(watchedReference, key, referenceName, queue);
-	// ④
+    // ④
     ensureGoneAsync(watchStartNanoTime, reference);
   }
 ```
@@ -237,7 +239,7 @@ private void postToBackgroundWithDelay(final Retryable retryable, final int fail
 Retryable.Result ensureGone(final KeyedWeakReference reference, final long watchStartNanoTime) {
     long gcStartNanoTime = System.nanoTime();
     long watchDurationMs = NANOSECONDS.toMillis(gcStartNanoTime - watchStartNanoTime);
-	// ①
+    // ①
     removeWeaklyReachableReferences();
 
     if (debuggerControl.isDebuggerAttached()) {
@@ -290,7 +292,7 @@ private void removeWeaklyReachableReferences() {
   }
 ```
 
-① 从引用队列中取出对象，如果不为空，就删除集合保存的隐射该对象的随机数。如果对象被回收了，就会在引用队列中存在，那么就会删除集合中的随机数，也就意味着没有内存泄露。
+① 从引用队列中取出对象，如果不为空，就删除集合保存的映射该对象的随机数。如果对象被回收了，就会在引用队列中存在，那么就会删除集合中的随机数，也就意味着没有内存泄露。
 
 ② 判断*retainedKeys*集合中是否还有该随机数，如果没有了，说明引用队列有该对象，该对象被回收了，没有内存泄露。
 
