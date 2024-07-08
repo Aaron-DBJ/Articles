@@ -63,7 +63,3 @@ locate java_home
 /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/usr/share/man/man1/java_home.1
 /usr/libexec/java_home/usr/share/man/man1/java_home.1
 ```
-
-
-
-
