@@ -81,20 +81,14 @@ public class MyFragment extends Fragment {
 }
 ```
 
-
-
 ## 最佳实践
 
 以下是实现 ViewModel 时应遵循的一些重要的最佳实践：
 
 - 由于 [ViewModel 的作用域](https://developer.android.com/topic/libraries/architecture/viewmodel?hl=zh-cn#lifecycle)，请使用 ViewModel 作为屏幕级状态容器的实现细节。请勿将它们用条状标签组或表单等可重复使用的界面组件的状态容器。否则，除非您针对每个芯片使用显式视图模型键，否则，对于同一个界面组件在同一 ViewModelStoreOwner 下的不同用法，您将会获得相同的 ViewModel 实例。
-- **ViewModel 不应该知道界面实现细节。请尽可能对 ViewModel API 公开的方法和界面状态字段使用通用名称。**这样一来，ViewModel 便可以适应任何类型的界面：手机、可折叠设备、平板电脑甚至 Chromebook！
+- **ViewModel 不应该知道界面实现细节。请尽可能对 ViewModel API 公开的方法和界面状态字段使用通用名称。** 这样一来，ViewModel 便可以适应任何类型的界面：手机、可折叠设备、平板电脑甚至 Chromebook！
 - **由于 ViewModel 的生命周期可能比 `ViewModelStoreOwner` 更长，因此 ViewModel 不应保留任何对与生命周期相关的 API（例如 `Context` 或 `Resources`）的引用，以免发生内存泄漏。**
 - **请勿将 ViewModel 传递给其他类、函数或其他界面组件**。由于平台会管理它们，因此您应该使其尽可能靠近平台。应该靠近您的 activity、fragment 或屏幕级可组合函数。这样可以防止较低级别的组件访问超出其需求的数据和逻辑。
-
-
-
-
 
 ---
 
@@ -228,3 +222,65 @@ LiveData 没有公开可用的方法来更新存储的数据。[`MutableLiveData
 **注意**：您必须调用 [`setValue(T)`](https://developer.android.com/reference/androidx/lifecycle/MutableLiveData?hl=zh-cn#setValue(T)) 方法以从主线程更新 `LiveData` 对象。如果在工作器线程中执行代码，您可以改用 [`postValue(T)`](https://developer.android.com/reference/androidx/lifecycle/MutableLiveData?hl=zh-cn#postValue(T)) 方法来更新 `LiveData` 对象。
 
 
+
+## LiveData数据倒灌
+
+**官方描述**
+
+ViewModel 将数据保留在内存中，这意味着开销要低于从磁盘或网络检索数据。ViewModel 与一个 Activity（或其他某个生命周期所有者）相关联，在配置更改期间保留在内存中，系统会自动将 ViewModel 与发生配置更改后产生的新 Activity 实例相关联。
+
+**总结**
+
+Activity异常销毁然后重建，ViewModel会保存销毁之前的数据，然后在Activity重建完成后进行数据恢复，所以LiveData成员变量中的`mVersion`会恢复到重建之前的值。
+
+但是Activity重建后会调用LiveData的`observe()`方法，方法内部会重新new一个实例，会将`mLastVersion`恢复到初始值(-1)。
+
+由于LiveData本身的特性，Activity的生命周期由非活跃变成活跃时，LiveData会触发事件分发，导致屏幕旋转或者切换系统语言后出现数据倒灌。
+
+但是这里有一点要非常注意：系统内存不足，杀到应用后台，也会导致Activity重建，但是不会LiveData导致数据倒灌。
+
+**常见触发场景**
+
+- 横竖屏切换
+
+- 切换系统语言
+
+
+
+
+
+# Lifecyle
+
+[`Lifecycle`](https://developer.android.com/reference/androidx/lifecycle/Lifecycle?hl=zh-cn) 是一个类，用于存储有关组件（如 activity 或 fragment）的生命周期状态的信息，并允许其他对象观测此状态。
+
+[`Lifecycle`](https://developer.android.com/reference/androidx/lifecycle/Lifecycle?hl=zh-cn) 使用两种主要枚举跟踪其关联组件的生命周期状态：
+
+- **活动**
+  
+  从框架和 [`Lifecycle`](https://developer.android.com/reference/androidx/lifecycle/Lifecycle?hl=zh-cn) 类分派的生命周期事件。这些事件映射到 activity 和 fragment 中的回调事件。
+
+- **状态**
+  
+  [`Lifecycle`](https://developer.android.com/reference/androidx/lifecycle/Lifecycle?hl=zh-cn) 对象所跟踪的组件的当前状态。
+
+<img src="https://raw.githubusercontent.com/Aaron-DBJ/ImageRepo/img/20240715103559.png" title="" alt="" width="613">
+
+# LifecycleOwner
+
+[`LifecycleOwner`](https://developer.android.com/reference/androidx/lifecycle/LifecycleOwner?hl=zh-cn) 是只包含一个方法的接口，指明类具有 [`Lifecycle`](https://developer.android.com/reference/androidx/lifecycle/Lifecycle?hl=zh-cn)。它包含一个方法（即 [`getLifecycle()`](https://developer.android.com/reference/androidx/lifecycle/LifecycleOwner?hl=zh-cn#getLifecycle())），该方法必须由类实现。
+
+Activity和Fragment默认实现了该接口
+
+# LifecycleRegistry
+
+**Lifecycle接口的唯一实现类**
+
+
+
+
+
+# 参考资料
+
+[ViewModel](https://developer.android.com/topic/libraries/architecture/viewmodel?hl=zh-cn)
+
+[LiveData](https://developer.android.com/topic/libraries/architecture/livedata?hl=zh-cn#java)

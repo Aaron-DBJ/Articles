@@ -35,10 +35,12 @@ buildTypes {
             signingConfig signingConfigs.debugConfig
             multiDexEnabled true
         }
+
 }
 ...
 </code>
 </pre>
+
 </details>
 
 ## *Product flavors*（产品变种）

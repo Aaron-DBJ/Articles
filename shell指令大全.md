@@ -63,3 +63,13 @@ locate java_home
 /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk/usr/share/man/man1/java_home.1
 /usr/libexec/java_home/usr/share/man/man1/java_home.1
 ```
+
+#### cat
+
+查看文件内容 
+
+
+
+#### top
+
+查看系统cpu、内存等使用情况

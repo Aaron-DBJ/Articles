@@ -1,4 +1,4 @@
-[toc]
+[TOC]
 
 # 一、前言
 
@@ -15,11 +15,11 @@
 
 # 二、LayoutInflater源码解析
 
-​	通常我们动态加载一个布局文件是通过LayoutInflater的inflate方法来完成，其实在Activity中，setContentView方法底层也是调用的该方法完成。相关代码在PhoneWindow类：
+​    通常我们动态加载一个布局文件是通过LayoutInflater的inflate方法来完成，其实在Activity中，setContentView方法底层也是调用的该方法完成。相关代码在PhoneWindow类：
 
 ```java
-		//PhoneWindow.java
-		@Override
+        //PhoneWindow.java
+        @Override
     public void setContentView(int layoutResID) {
         // Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window
         // decor, when theme attributes and the like are crystalized. Do not check the feature
@@ -81,7 +81,7 @@ public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean atta
                         type != XmlPullParser.END_DOCUMENT) {
                     // Empty
                 }
-								//没有开始标签，说明布局文件语法错误，解析不出来
+                                //没有开始标签，说明布局文件语法错误，解析不出来
                 if (type != XmlPullParser.START_TAG) {
                     throw new InflateException(parser.getPositionDescription()
                             + ": No start tag found!");
@@ -111,7 +111,7 @@ public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean atta
                             temp.setLayoutParams(params);
                         }
                     }
-										......
+                                        ......
                     ④// Inflate all children under temp against its context.
                     rInflateChildren(parser, temp, attrs, true);
                     ......
@@ -222,7 +222,7 @@ View createViewFromTag(View parent, String name, Context context, AttributeSet a
 
         try {
             View view = tryCreateView(parent, name, context, attrs);
-						
+
             if (view == null) {
                 final Object lastContext = mConstructorArgs[0];
                 mConstructorArgs[0] = context;
@@ -272,8 +272,8 @@ public final View tryCreateView(@Nullable View parent, @NonNull String name,
 正常情况下，没有拦截View创建过程，会进入到
 
 ```java
-					......					
-					if (view == null) {
+                    ......                    
+                    if (view == null) {
                 final Object lastContext = mConstructorArgs[0];
                 mConstructorArgs[0] = context;
                 try {
@@ -286,8 +286,8 @@ public final View tryCreateView(@Nullable View parent, @NonNull String name,
                     mConstructorArgs[0] = lastContext;
                 }
             }
-					return view;
-					......
+                    return view;
+                    ......
 ```
 
 ①处判断是否有「.」号，通常是自定义View（自定义 View的形式为<package_name>.customViewName），自定义View直接调用③处方法createView，代码如下👇(部分代码已省略)：
@@ -360,7 +360,7 @@ public final View createView(@NonNull Context viewContext, @NonNull String name,
                 mConstructorArgs[0] = lastContext;
             }
         } catch (NoSuchMethodException e) {
-        	......
+            ......
         }
     }
 ```
@@ -382,7 +382,7 @@ public final View createView(@NonNull Context viewContext, @NonNull String name,
 ```java
 void rInflate(XmlPullParser parser, View parent, Context context,
             AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
-				......
+                ......
         while (((type = parser.next()) != XmlPullParser.END_TAG ||
                 parser.getDepth() > depth) && type != XmlPullParser.END_DOCUMENT) {
 
@@ -426,7 +426,7 @@ void rInflate(XmlPullParser parser, View parent, Context context,
 
 写个demo来验证一下，自定义一个简单View布局，重写onFinishInflate，打印一句话。
 
-```java 
+```java
 public class customTextView extends AppCompatTextView {
     public customTextView(Context context) {
         super(context);
@@ -464,10 +464,10 @@ public class InflateTestView extends LinearLayout {
         this(context, attrs, 0);
     }
 
-    public InflateTestView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) 		{
+    public InflateTestView(Context context, @Nullable AttributeSet attrs, int defStyleAttr)         {
         super(context, attrs, defStyleAttr);
     }
-  
+
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
@@ -543,7 +543,7 @@ customTextView和InflateTestView都重写了onFinishInflate方法，所以在加
 关于root和attachRoot参数的作用，还是要到代码中去找，在inflate方法中：
 
 ```java
-...... 										
+......                                         
 // Temp is the root view that was found in the xml
                     final View temp = createViewFromTag(root, name, inflaterContext, attrs);
                     ViewGroup.LayoutParams params = null;
@@ -577,4 +577,3 @@ customTextView和InflateTestView都重写了onFinishInflate方法，所以在加
 temp是root view对象，如果root参数不为null，那么会生成该View的LayoutParams对象（params）；此时，如果attachToRoot参数为false，那么会将params设置为根视图的layout params。
 
 如果root参数不为null且attachToRoot参数为true，就把当前视图添加到root所代表的View中。
-

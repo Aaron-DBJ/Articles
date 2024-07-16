@@ -1,4 +1,4 @@
-[toc]
+[TOC]
 
 # 一、前言
 
@@ -41,7 +41,7 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 同创建Fragment方式类似，在该方法内加载自定义布局，适用于使用自定义样式弹窗的情况。
 
 ```java
-		@Override
+        @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_base, container, false);
     }
@@ -78,7 +78,7 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 上节提及过，如果使用自定义方式创建dialog，那么在布局文件中生命的样式是无用的。为了解决这个问题，需要在DialogFragment的onStart回调中获取Dialog的Window对象，通过Window对象来设置Dialog的布局和样式。例如
 
 ```java
-		@Override
+        @Override
     public void onStart() {
         super.onStart();
         Dialog dialog = getDialog();
@@ -99,15 +99,15 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 #### 1、setBackgroundDrawableResource
 
 1. 先看setBackgroundDrawableResource，实际调用的是Window#setBackgroundDrawable，它是个抽象方法。众所周知，Window的唯一实现类是PhoneWindow，在其中找到对应方法
-
+   
    ```java
        public abstract void setBackgroundDrawable(Drawable drawable);
    ```
 
 2. PhoneWindow#setBackgroundDrawable
-
+   
    ```java
-   		@Override
+           @Override
        public final void setBackgroundDrawable(Drawable drawable) {
            if (drawable != mBackgroundDrawable) {
                mBackgroundDrawable = drawable;
@@ -122,12 +122,10 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
        }
    ```
 
-   
-
    其中第6行，mDecor.setWindowBackground(drawable)，mDecor是个DecorView实例，如果mDecor不为null的话，就设置背景。对于DialogFragment来说，就是Dialog的DecorView实例。所以下一步我们只需**确认「mDecor」初始化的位置。**
 
 3. 目标聚焦于找寻Dialog的DecorView实例初始化位置，阅读Dialog源码，发现Dialog的mDecor初识化位置正是在其show方法中。
-
+   
    ```java
    public void show() {
            if (mShowing) {
@@ -152,8 +150,8 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
            }
    
            onStart();
-     			/**
-         	* ① mDecor初始化位置
+                 /**
+             * ① mDecor初始化位置
            */
            mDecor = mWindow.getDecorView();
    
@@ -181,12 +179,12 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
            sendShowMessage();
        }
    ```
-
+   
    接着反向推到DialogFragment又在何时调用了Dialog#show方法，很简单的定位一下位置，发现
-
+   
    ```java
    // DialogFragment.class
-   		@Override
+           @Override
        public void onStart() {
            super.onStart();
    
@@ -196,13 +194,13 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
            }
        }
    ```
-
+   
    所以，正是在DialogFragment的onStart方法中调用了Dialog#show方法，初始化了Dialog#mDecor对象，才能使布局设置生效。
-
+   
    #### 2、setLayout方法
    
    1. Window#setLayout
-   
+      
       ```java
       public void setLayout(int width, int height) {
               final WindowManager.LayoutParams attrs = getAttributes();
@@ -211,11 +209,11 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
               dispatchWindowAttributesChanged(attrs);
       }
       ```
-   
+      
       只是给Window的属性赋值，既然设置了宽高数据，那么一定有一个方法是将所设置数据（宽高）应用到Window上。还是在PhoneWindow中，有个setAttributes方法
    
    2. PhoneWindow#setAttributes
-   
+      
       ```java
           @Override
           public void setAttributes(WindowManager.LayoutParams params) {
@@ -225,8 +223,7 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
               }
           }
       ```
-   
+      
       还是需要初始化了mDecor对象，才能使设置生效
 
 **综上，动态设置DialogFragment的布局和样式必须在Dialog的DecorView实例初始化之后才能生效，即在onStart方法中去设置。**
-

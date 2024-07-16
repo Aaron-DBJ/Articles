@@ -35,7 +35,6 @@
             return activity != null 
                       && activity.getApplicationInfo().targetSdkVersion < android.os.Build.VERSION_CODES.HONEYCOMB;
         }
-
 ```
 
 2.onPause之后和onStop之前调用
@@ -118,7 +117,7 @@ android.app.ActivityThread
 
 - 当用户按下HOME键时 
 
--  长按HOME键，选择运行其他的程序时 
+- 长按HOME键，选择运行其他的程序时 
 
 - 按下电源按键（关闭屏幕显示）时 
 
@@ -131,8 +130,6 @@ android.app.ActivityThread
 ## onRestoreInstanceState什么时候执行
 
 执行**OnRestoreInstanceState**方法是在Activity的**onStart**之后。
-
-
 
 ## 参考材料
 
