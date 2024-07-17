@@ -221,8 +221,6 @@ LiveData 没有公开可用的方法来更新存储的数据。[`MutableLiveData
 
 **注意**：您必须调用 [`setValue(T)`](https://developer.android.com/reference/androidx/lifecycle/MutableLiveData?hl=zh-cn#setValue(T)) 方法以从主线程更新 `LiveData` 对象。如果在工作器线程中执行代码，您可以改用 [`postValue(T)`](https://developer.android.com/reference/androidx/lifecycle/MutableLiveData?hl=zh-cn#postValue(T)) 方法来更新 `LiveData` 对象。
 
-
-
 ## LiveData数据倒灌
 
 **官方描述**
@@ -244,10 +242,6 @@ Activity异常销毁然后重建，ViewModel会保存销毁之前的数据，然
 - 横竖屏切换
 
 - 切换系统语言
-
-
-
-
 
 # Lifecyle
 
@@ -274,10 +268,6 @@ Activity和Fragment默认实现了该接口
 # LifecycleRegistry
 
 **Lifecycle接口的唯一实现类**
-
-
-
-
 
 # 参考资料
 
