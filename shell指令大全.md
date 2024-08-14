@@ -1,3 +1,9 @@
+
+
+
+
+[cat 命令，Linux cat 命令详解：连接多个文件并打印到标准输出。 - Linux 命令搜索引擎](https://wangchujiang.com/linux-command/c/cat.html) <sup>**<mark>*new*</mark>**</sup>
+
 #### man
 
 **说明**
@@ -67,8 +73,6 @@ locate java_home
 #### cat
 
 查看文件内容 
-
-
 
 #### top
 
