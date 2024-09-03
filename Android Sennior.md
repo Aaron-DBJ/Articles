@@ -5,6 +5,7 @@ Android中的ClassLoader主要是[PathClassLoader](https://link.juejin.cn?target
 PathClassLoader和DexClassLoader的区别：
 
 - **PathClassLoader只能固定加载apk包路径**，不能指定dex文件解压路径。该路径是写死的在/data/dalvik-cache/路径下。所以只能用于加载已安装的apk。
+
 - DexClassLoader可以指定apk包路径和dex文件解压路径（加载jar、apk、dex文件）
   当ClassLoader加载类时，会调用它的findclass方法去查找该类。  
   下方是BaseDexClassLoader的findClass方法实现：
@@ -138,11 +139,17 @@ Sophix采用的是替换整个ArtMethod结构体，这样不会存在兼容问�
 3. 修改所有 **Resource** 的 *Resource.mAssets(AssetManager实例)* 引用指向新构建的 **AssetManager** 对象.
    对于任意的资源包，被 *AssetManager#addAssetPath* 添加之后，解析 **resourecs.asrc** 并在 native *mResources* 侧保存起来。可参考 [AssetManager.h](https://android.googlesource.com/platform/frameworks/base/+/master/libs/androidfw/include/androidfw/AssetManager.h) 的实现，实际上 *mResources* 是一个 **ResTable** 结构体,存放 **resourecs.asrc** 信息用的。而且一个进程只会有一个 **ResTable**。
 - **ResTable** 可加载多个资源包
+
 - 一个资源包都包含一个 **resourecs.asrc**
+
 - 每一个 **resourecs.asrc** 记录了该包的所有资源信息，每一个资源对应一个 **ResChunk**
+
 - 每一个 **ResChunk** 都有一个唯一的编号，由该编号由三部分构成，比如 **0x7f0e0000**. 可以随便找一个 apk 解包查看 *resourecs.asrc* 文件。
+  
   - 前两位 *0x7f* 为 package id，用于区分是哪个资源包
+  
   - 接着两位 *0x0e* 为 type id，用于区分是哪类型资源，比如 drawable，string 等
+  
   - 最后四位 *0x0000* 为 entry id，用于表示一个资源项，第一个为 *0x0000*，第二个为 *0x0001* 依次递增。
     
     > 值得注意的是，系统的资源包的 package id 为 0x01，我们的 apk 为 0x7f
@@ -153,7 +160,9 @@ Sophix采用的是替换整个ArtMethod结构体，这样不会存在兼容问�
     ### 热修复和插件化区别
     
     插件化和热修复的原理，都是动态加载 dex／apk 中的类／资源，让宿主正常的加载和运行插件（补丁）中的内容。 **两者的目的不同**:
+
 - 插件化目标是想把需要实现的模块或功能当做一个独立的文件提取出来，减少宿主的规模。所以插件化重在解决组件的生命周期，以及资源的问题
+
 - 热修复目标在修复已有的问题。重在解决替换已有的有问题的类／方法／资源等。
 
 ---
@@ -167,7 +176,9 @@ Native 程序通过 link 连接后，当发生 Native Crash 时，则 kernel 会
 
 2. target 进程通过 debuggerd_signal_handler，捕获 signal；
 - 建立于 debuggerd 进程的 socket 通道；
+
 - 将 action = DEBUGGER_ACTION_CRASH 的消息发送给 debuggerd 服务端；
+
 - 阻塞等待 debuggerd 服务端的回应数据。
 3. debuggerd 作为守护进程，一直在等待 socket client 的连接，此时收到 action = DEBUGGER_ACTION_CRASH 的消息；
 
@@ -176,7 +187,6 @@ Native 程序通过 link 连接后，当发生 Native Crash 时，则 kernel 会
 5. 新创建的进程，通过 socket 与 system_server 进程中的 NativeCrashListener 线程建立 socket 通道，并向其发送 native crash 信息；
 
 6. NativeCrashListener 线程通过创建新的名为“NativeCrashReport”的子线程来执行 AMS 的 handleApplicationCrashInner 方法。
-
 
 [Android基础开发实践：如何分析Native Crash-腾讯云开发者社区-腾讯云](https://cloud.tencent.com/developer/article/1192001)
 [Android 平台 Native 代码的崩溃捕获机制及实现 - 掘金](https://juejin.cn/post/6844903486836965389#heading-0)
@@ -190,8 +200,11 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
 那么哪些场景会造成ANR呢？
 
 - Service Timeout: 比如前台服务在20s内未执行完成；
+
 - BroadcastQueue Timeout：比如前台广播在10s内未执行完成
+
 - ContentProvider Timeout：内容提供者,在publish过超时10s;
+
 - InputDispatching Timeout:  输入事件分发超时5s，包括按键和触摸事件。
   触发ANR的过程可分为三个步骤: 埋炸弹, 拆炸弹, 引爆炸弹
   
@@ -204,6 +217,8 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
   [Android ANR 原理](https://segmentfault.com/a/1190000022967452)
   [ANR如何产生之InputDispatching Timeout篇 - 掘金](https://juejin.cn/post/7202598910338400316)
   [Android Input（八）- ANR原理分析 - 简书](https://www.jianshu.com/p/b8b35d3ee052)
+  
+  ---
   
   # Android APT
   
@@ -250,7 +265,9 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
   >                                                         apt生成类.png
   > 这里先简单总结一下： 
   > 2.1、在完成注解处理类`Processor`之后，需要做2件事情：
+
 - **在META-INF目录下注册`Processor`**
+
 - **在项目中使用注解的地方添加apt工具`annotationProcessor`**
   2.2、APT 4要素 
   　　**注解处理器（AbstractProcess）+ 代码处理（javaPoet）+ 处理器注册（AutoService）+ apt（annotationProcessor）**
@@ -264,9 +281,13 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
   ### Q3：注解申明和注解处理器为什么要分Module处理？
   
   先来回顾一下之前的项目结构：
+
 - `annotation`：申明注解 （java lib）
+
 - `processor`：注解处理器（java lib）
+
 - `inject_api`：调用处理器中生成的类 （android lib）
+
 - `app`：项目使用 （android lib）
   我们都知道注解处理器都需要继承`AbstractProcessor`类，但是`AbstractProcessor`是JDK中的类，不在android sdk中，所以需要放在单独的java lib中；而`processor`中需要依赖自定义注解，把`annotation`抽成一个独立的lib，便于维护。
   **那注解声明和注解处理为什么要分开呢？可不可以放在一起？** 
