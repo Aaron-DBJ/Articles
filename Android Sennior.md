@@ -135,7 +135,9 @@ Sophix采用的是替换整个ArtMethod结构体，这样不会存在兼容问�
 资源修复是很常见的操作，热修复方案中的资源修复很多参考了 **Instant Run** 的实现，**Instant Run** 的资源修复核心流程大致如下：
 
 1. 构建一个新的 **AssetManager** 对象，并调用 *addAssetPath* 添加新的资源包；
+
 2. 修改所有 **Activity** 的 *Activity.mAssets(AssetManager实例)* 引用指向新构建的 **AssetManager** 对象；
+
 3. 修改所有 **Resource** 的 *Resource.mAssets(AssetManager实例)* 引用指向新构建的 **AssetManager** 对象.
    对于任意的资源包，被 *AssetManager#addAssetPath* 添加之后，解析 **resourecs.asrc** 并在 native *mResources* 侧保存起来。可参考 [AssetManager.h](https://android.googlesource.com/platform/frameworks/base/+/master/libs/androidfw/include/androidfw/AssetManager.h) 的实现，实际上 *mResources* 是一个 **ResTable** 结构体,存放 **resourecs.asrc** 信息用的。而且一个进程只会有一个 **ResTable**。
 - **ResTable** 可加载多个资源包
@@ -686,3 +688,9 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
   # Java编译流程
   
   [爆爆：Java代码编译流程是怎样的？-java 编译过程](https://www.51cto.com/article/699503.html)
+
+---
+
+# SqlLite数据库性能优化
+
+[Sqlite简易性能优化方案，给你的应用插上“翅膀”最近对数据库进行了一番优化，**增加耗时统计，以及优化现有的sql语 - 掘金](https://juejin.cn/post/7173460152396300295)
