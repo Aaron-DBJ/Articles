@@ -75,7 +75,7 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
 
 ## 2.2 DialogFragment布局不生效
 
-上节提及过，如果使用自定义方式创建dialog，那么在布局文件中生命的样式是无用的。为了解决这个问题，需要在DialogFragment的onStart回调中获取Dialog的Window对象，通过Window对象来设置Dialog的布局和样式。例如
+上节提及过，如果使用自定义方式创建dialog，那么在布局文件中声明的样式是无效的。为了解决这个问题，需要在DialogFragment的onStart回调中获取Dialog的Window对象，通过Window对象来设置Dialog的布局和样式。例如
 
 ```java
         @Override
@@ -121,7 +121,7 @@ public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
            }
        }
    ```
-
+   
    其中第6行，mDecor.setWindowBackground(drawable)，mDecor是个DecorView实例，如果mDecor不为null的话，就设置背景。对于DialogFragment来说，就是Dialog的DecorView实例。所以下一步我们只需**确认「mDecor」初始化的位置。**
 
 3. 目标聚焦于找寻Dialog的DecorView实例初始化位置，阅读Dialog源码，发现Dialog的mDecor初识化位置正是在其show方法中。
