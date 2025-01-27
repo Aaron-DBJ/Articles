@@ -694,3 +694,15 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
 # SqlLite数据库性能优化
 
 [Sqlite简易性能优化方案，给你的应用插上“翅膀”最近对数据库进行了一番优化，**增加耗时统计，以及优化现有的sql语 - 掘金](https://juejin.cn/post/7173460152396300295)
+
+# AIDL
+
+android 11之后AIDL客户端启动服务时，必须在AndroidManifest文件中使用`<queries>`标签声明可以使用的服务端进程名称，如：
+
+```xml
+    <queries>
+        <package android:name="com.example.aidlserver"/>
+    </queries>
+```
+
+否则服务启动失败。
