@@ -697,6 +697,8 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
 
 # AIDL
 
+## 1、包可见性
+
 android 11之后AIDL客户端启动服务时，必须在AndroidManifest文件中使用`<queries>`标签声明可以使用的服务端进程名称，如：
 
 ```xml
@@ -706,3 +708,86 @@ android 11之后AIDL客户端启动服务时，必须在AndroidManifest文件中
 ```
 
 否则服务启动失败。
+
+## 2、开启服务
+
+Android 5之后系统限制开启服务必须通过显式方式，如：
+
+```java
+Intent intent = new Intent(context, com.xxx.MyService.class);
+```
+
+但是对于AIDL这种跨进程场景（比如2个app），对于客服端没法访问到对应的服务类，还是只能隐式调用，有2种方式
+
+- 设置action和package
+
+- 设置ComponentName
+
+## 3、Binder死亡监听
+
+在IPC过程中，服务端进程可能因为各种原因意外挂掉，这种情况下，客户端再去调用服务端就会发生异常，所以客户端需要感知当前Binder连接情况，并做出处理。
+
+Android提供了`IBinder.DeathRecipient`接口来处理服务端挂掉的情况，通过重写该接口的`binderDied`方法，来做一些资源清理或重连的工作。`binderDied`会在连接断开时被系统调用
+
+使用流程：
+
+- 连接建立时，在`onServiceConnected`方法里通过`IBinder.linkToDeath`注册binder死亡监听。`linkToDeath`方法有2个参数，第一个是客户端实现的`IBinder.DeathRecipient`对象，另一个是flag，通常传0即可。
+
+- binder死亡时，系统会通知到`IBinder.DeathRecipient`的`binderDied`方法，在其中调用`IBinder.unlinkToDeath`解除监听。并且进行重连尝试。
+
+示例：
+
+```java
+// client
+ private final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Log.d(TAG, "onServiceConnected: componentName = " + componentName + "; iBinder = " + iBinder);
+            msgManager = IMsgManager.Stub.asInterface(iBinder);
+            try {
+                if (msgManager == null) {
+                    Log.d(TAG, "onServiceConnected: msgManager is null");
+                    return;
+                }
+
+                processGuard = new ProcessGuard(iBinder, () -> {
+                    if (!bindService()) {
+                        // 重连未成功后，10s后再试一次
+                        bindView.postDelayed(() -> bindService(), 10 * 1000);
+                    }
+                });
+                iBinder.linkToDeath(processGuard, 0);
+                msgManager.registerReceiveListener(receiveMsgListener);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+// processguard
+
+ @Override
+    public void binderDied() {
+        Log.d(TAG, "binderDied: ---");
+        doDie();
+    }
+
+    @Override
+    public void binderDied(@NonNull IBinder who) {
+        Log.d(TAG, "binderDied: who is " + who);
+        doDie();
+    }
+
+    private void doDie() {
+        if (mBinder != null) {
+            Log.d(TAG, "binderDied: server died");
+            mBinder.unlinkToDeath(this, 0);
+            mBinder = null;
+        }
+
+        if (retryRunnable != null) {
+            retryRunnable.run();
+            Log.d(TAG, "doDie: 重连");
+        }
+    }
+```
