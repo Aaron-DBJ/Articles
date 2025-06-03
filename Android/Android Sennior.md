@@ -265,15 +265,20 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
   > 只有在你使用注解的地方引入了`annotationProcessor`，系统才会主动调用注解处理类`Processor`,才会最终生成如下的`.java`文件
   > ![](https://raw.githubusercontent.com/Aaron-DBJ/ImageRepo/img/20240524111719.png)
   >                                                         apt生成类.png
-  > 这里先简单总结一下： 
-  > 2.1、在完成注解处理类`Processor`之后，需要做2件事情：
-
-- **在META-INF目录下注册`Processor`**
-
-- **在项目中使用注解的地方添加apt工具`annotationProcessor`**
-  2.2、APT 4要素 
-  　　**注解处理器（AbstractProcess）+ 代码处理（javaPoet）+ 处理器注册（AutoService）+ apt（annotationProcessor）**
-  `APT(Annotation Processing Tool)总结` 
+  
+   这里先简单总结一下： 
+  
+  #### 2.1、在完成注解处理类`Processor`之后，需要做2件事情：
+  
+  - **在META-INF目录下注册`Processor`**
+  
+  - **在项目中使用注解的地方添加apt工具`annotationProcessor`**
+  
+  #### 2.2、APT 4要素
+  
+  **注解处理器（AbstractProcess）+ 代码处理（javaPoet）+ 处理器注册（AutoService）+ apt（annotationProcessor）**
+  
+  **APT(Annotation Processing Tool)总结**
   首先，APT是javac提供的一种工具，它在编译时扫描、解析、处理注解。它会对源代码文件进行检测，找出用户自定义的注解，根据注解、注解处理器和相应的apt工具自动生成代码。这段代码是根据用户编写的注解处理逻辑去生成的。**最终将生成的新的源文件与原来的源文件共同编译（注意：APT并不能对源文件进行修改操作，只能生成新的文件，例如往原来的类中添加方法）**。具体流程图如下图所示：  
   ![](https://raw.githubusercontent.com/Aaron-DBJ/ImageRepo/img/20240524111846.png)
                                                   apt工作流程.png
@@ -377,6 +382,8 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
   ```
   
   ## 注解处理器初始化
+  
+  > [JDK源码](https://github.com/openjdk/jdk8u/blob/master/langtools/src/share/classes/com/sun/tools/javac/processing/JavacProcessingEnvironment.java)
   
   终于在`JavaCompiler#compile`方法中找到了javac执行过程中对APT的处理。首先`initProcessAnnotations`方法实现了对APT的初始化。根据源码流程可知此时，该方法参数为要执行的注解处理器集合，当前其实被设置为`null`。
   那`initProcessAnnotations`方法中会怎么初始化我们的APT程序呢？实际上，在一开始我们说**APT程序就是Javac的小插件，由javac在编译时候根据条件调起！** 那么既然javac要调起APT中`AbstractProcessor`的process方法，而process方法是实例方法，自然需要先实现对APT中的`AbstractProcessor（Processor接口）`实现类class对象的加载。
