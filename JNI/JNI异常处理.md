@@ -89,7 +89,7 @@ extern "C"
 JNIEXPORT jint JNICALL
 Java_com_example_kotlindemo_jni_JniApi_testException(JNIEnv *env, jobject thiz,
                                                      jobject user_handler) {
-    
+
     // 省略无关代码
     ...
     jint ret = 0;
@@ -120,7 +120,7 @@ Java_com_example_kotlindemo_jni_JniApi_testException(JNIEnv *env, jobject thiz,
         LOGE("=========> UserHandler testException check exception");
         env->ExceptionDescribe();
         env->ExceptionClear();
-        
+
         ...
         env->DeleteLocalRef(exception) // 手动删除
         return -1;
@@ -151,4 +151,32 @@ Java_com_example_kotlindemo_jni_JniApi_testException(JNIEnv *env, jobject thiz,
 
 # C++层异常
 
-如果是C++层的异常，跟Java类似，C++也提供了try-catch的机制来捕获处理异常。注意，C++处理的异常范围或种类跟Java有较大不同，不要带着Java经验认为C++会处理这些异常（比如）
+如果是C++层的异常，跟Java类似，C++也提供了try-catch的机制来捕获处理异常。注意，C++处理的异常范围或种类跟Java有较大不同，不要带着Java经验认为C++会处理这些异常（比如 除零之类的）。
+
+C++标准异常类结构
+
+```
+std::exception
+├── std::bad_alloc
+├── std::bad_cast  
+├── std::bad_typeid
+├── std::bad_exception
+├── std::logic_error
+│ ├── std::domain_error
+│ ├── std::invalid_argument
+│ ├── std::length_error
+│ └── std::out_of_range
+└── std::runtime_error
+ ├── std::overflow_error
+ ├── std::underflow_error
+ ├── std::range_error
+ └── std::system_error
+```
+
+关于这些异常详细信息可以查找下C++相关的资料。
+
+如果触发了上述C++异常，try-catch可以捕获，后续处理就跟Java很类似了，可以根据需要处理，比如打印日志，埋点等。
+
+# 总结
+
+Android JNI开发中，对于Java层异常，通常使用检测 - 打印信息 - 清除 - 抛出的流程来处理，每个流程JNI都提供了对应的函数去处理，当然这些流程不是每一步都是必须的，根据自己的业务去灵活选用即可。
