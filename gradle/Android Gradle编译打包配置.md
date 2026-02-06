@@ -6,6 +6,16 @@
 
 想要实现以上目的， 就需要用的变体、产品变种等Gradle配置。
 
+# Gradle生命周期
+
+Gradle 的生命周期只有三个阶段，分别是 `Initialization (初始化)`、`Configuration (配置)` 和 `Execution (执行)`，如下图所示：
+
+<img src="https://raw.githubusercontent.com/Aaron-DBJ/ImageRepo/img/20241105114903.png" title="" alt="" width="610">
+
+- 在 **初始化阶段（Initialization）**，主要是解析 `settings.gradle(.kts)` 文件，并创建`Settings`实例。在解析`settings.gradle(.kts)` 文件时，Gradle 根据该文件来决定构建应该包含哪些项目，并为需要构建的项目创建 `Project` 实例。
+- **配置阶段（Configuration）**： 则会解析参与构建项目的`build.gradle(.kts)`文件，并根据 build.gradle 文件来创建构建需要的 Task 有向无环图(DAG)
+- **执行阶段（Execution）** 则会执行在配置阶段构建好的任务图
+
 # 构建术语
 
 ## *Build types*（构建类型）
@@ -29,17 +39,15 @@ buildTypes {
             debuggable false
             multiDexEnabled true
         }
-
-         debug {
-            //noinspection GroovyAssignabilityCheck
-            signingConfig signingConfigs.debugConfig
-            multiDexEnabled true
+        debug {
+            //noinspection GroovyAssignabilityCheck
+            signingConfig signingConfigs.debugConfig
+            multiDexEnabled true
         }
-
 }
 ...
-</code>
-</pre>
+</code></pre>
+</details>
 
 </details>
 
@@ -84,7 +92,7 @@ android {
 
 合并工具会根据每个清单文件的优先级按顺序合并，将所有清单文件组合到一个文件中。例如，如果有三个清单文件，则会先将优先级最低的清单合并到优先级第二高的清单中，然后再将合并后的清单合并到优先级最高的清单中。
 
-![](https://developer.android.com/static/studio/images/build/manifest-merger_2x.png?hl=zh-cn)
+<img src="https://raw.githubusercontent.com/Aaron-DBJ/ImageRepo/img/20241120153745.png" title="" alt="" width="691">
 
 有三种基本的清单文件可以互相合并，它们的合并优先级如下（**按优先级由高到低的顺序**）
 

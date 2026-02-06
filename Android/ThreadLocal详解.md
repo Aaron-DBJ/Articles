@@ -184,7 +184,7 @@ private boolean cleanSomeSlots(int i, int n) {
 
 可以看到，key为弱引用虽然可以在GC后解除引用连接，但是如果Thread长期存活的话，依旧会存在这条链路：Thread Ref → Current Thread → ThreadLocalMap → Entry → Value，value由于是强引用不会被回收，就会导致内存泄露。
 
-ThreadLocal也考虑打了这个问题，在执行 ThreadLocal 的 `set`、`remove`、`rehash` 等方法时，它都会扫描 key 为 null 的 Entry，如果发现某个 Entry 的 key 为 null，则代表它所对应的 value 也没有作用了，所以它就会把对应的 value 置为 null，这样，value 对象就可以被正常回收了。
+ThreadLocal也考虑到了这个问题，在执行 ThreadLocal 的 `set`、`remove`、`rehash` 等方法时，它都会扫描 key 为 *null* 的 Entry，如果发现某个 Entry 的 key 为 *null*，则代表它所对应的 value 也没有作用了，所以它就会把对应的 value 置为 *null*，这样，value 对象就可以被正常回收了。
 
 但是假设 ThreadLocal 已经不被使用了，那么实际上 `set`、`remove`、`rehash` 方法也不会被调用，与此同时，如果这个线程又一直存活、不终止的话，那么刚才的那个调用链就一直存在，也就导致了 value 的内存泄漏。
 

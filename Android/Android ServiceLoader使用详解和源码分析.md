@@ -30,33 +30,32 @@ A-->C
 
 首先约定几个概念名词，并且后文中，以这些名词行文。
 
-| 概念       | 说明                                                         | 备注                                                         |
-| ---------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| 服务       | 接口或（通常是）抽象类                                       | 出于加载的目的，**服务由单一类型表示，即单一接口或抽象类**。 （可以使用具体类，但不建议这样做。 |
+| 概念    | 说明                                                                           | 备注                                                                                              |
+| ----- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 服务    | 接口或（通常是）抽象类                                                                  | 出于加载的目的，**服务由单一类型表示，即单一接口或抽象类**。 （可以使用具体类，但不建议这样做。                                              |
 | 服务提供者 | 服务（接口和抽象类）的具体实现。服务提供者可以以扩展形式引入，例如jar包；也可以通过将它们添加到应用程序的类路径或通过其他一些特定于平台的方式来提供。 | 给定服务提供者包含一个或多个具体类，这些类使用特定于提供者的数据和代码扩展该服务类型。   此工具强制执行的唯一要求是**提供程序类必须具有零参数构造函数**，以便它们可以在加载期间实例化。 |
 
 1. 服务约定
-
+   
    定义好接口或抽象类作为服务
 
 2. 服务实现
-
+   
    实现定义好的服务，由于*ServiceLoader*可以更方便不同组件间通信，高度解耦。所以更常见的场景是服务可能是定义在底层组件或引入*jar*包，在上层业务代码中具体实现。
 
 3. 服务注册
-
+   
    约定和实现了服务后，需要对服务进行注册，系统才能定位到该服务。注册方式是在java同级目录，创建一个**resources/META-INF/services**的目录，在该目录下，以服务的全限定名创建一个SPI描述文件。目录层级图如下：
-
+   
    ![image-20211228174829011](/Users/mtdp/Library/Application Support/typora-user-images/image-20211228174829011.png)
-
+   
    有了该文件，**即可将服务提供者(接口实现类)的全限定名分行写入该文件，即完成服务注册**。
-
+   
    PS. 注册目录路径是固定，至于为什么后，下文代码部分将会说明。
 
 示例：
 
 ```java
-
 package com.example;
 // 声明服务
 public interface IHello {
@@ -78,19 +77,18 @@ mIterator =loader.iterator();
 while(mIterator.hasNext()){
     mIterator.next().sayHello();
 }
-
 ```
 
 # 三、代码逻辑
 
 *ServiceLoader*成员变量说明
 
-| 字段           | 类型                        | 说明                                    |
-| -------------- | --------------------------- | --------------------------------------- |
-| service        | Class*<*S*>*                | ServiceLoader加载的接口或抽象类         |
-| loader         | ClassLoader                 | 类加载器                                |
-| providers      | LinkedHashMap*<*String,S*>* | 缓存加载的接口或抽象类（即service对象） |
-| lookupIterator | LazyIterator                | 迭代器                                  |
+| 字段             | 类型                      | 说明                             |
+| -------------- | ----------------------- | ------------------------------ |
+| service        | Class<S>                | ServiceLoader加载的**接口**或**抽象类** |
+| loader         | ClassLoader             | 类加载器                           |
+| providers      | LinkedHashMap<String,S> | 缓存加载的接口或抽象类（即service对象）        |
+| lookupIterator | LazyIterator            | 迭代器                            |
 
 ## 3.1、ServiceLoader的创建
 
@@ -163,7 +161,7 @@ public Iterator<S> iterator() {
 
 可见就是创建了一个迭代器对象，实现了3个方法*hasNext*（用以判断是否还有为遍历的服务）、*next*（获取服务）和*remove*。在内部用*knownProviders*缓存了已注册服务，每次调用*hasNext或next*方法时，**先从缓存中的服务中取，没有再调用lookupIterator的对应方法**。
 
-对于首次创建的情况，缓存中没有注册好的服务，如果调用*hasNext，*就会调用*lookupIterator.hasNext()*，代码如下
+对于首次创建的情况，缓存中没有注册好的服务，如果调用*hasNext*，就会调用*lookupIterator.hasNext()*，代码如下
 
 ```java
 private class LazyIterator implements Iterator<S> {
@@ -200,13 +198,13 @@ private class LazyIterator implements Iterator<S> {
            nextName = pending.next();
            return true;
        }
-  
+
 }
 ```
 
 ①：判断nextName是否为null，表示下一个待注册服务的全称（目录路径+服务名），不为null表示有服务，直接返回true；否则继续执行
 
-②：*configs*保存所有指定名称的资源，在这里就是我们声明的**resources/META-INF/services/<package name>**文件。如果为*null*，表示还未加载该资源文件。
+②：*configs*保存所有指定名称的资源，在这里就是我们声明的 *resources/META-INF/services/<package name>* 文件。如果为 *null*，表示还未加载该资源文件。
 
 ③：构造要加载的资源文件全名，*PREFIX*的值为：
 
@@ -246,7 +244,7 @@ private Iterator<String> parse(Class<?> service, URL u)
         }
         return names.iterator();
     }
-    
+
 private int parseLine(Class<?> service, URL u, BufferedReader r, int lc,
                           List<String> names)
         throws IOException, ServiceConfigurationError
@@ -279,7 +277,7 @@ private int parseLine(Class<?> service, URL u, BufferedReader r, int lc,
 
 ## 3.3 服务的使用
 
-通过3.2小节讲解的步骤，现在服务已经全部注册了，可以获取各个服务实例并使用了。通常是通过*next()*方法获取服务的实例对象，代码如下：
+通过3.2小节讲解的步骤，现在服务已经全部注册了，可以获取各个服务实例并使用了。通常是通过 *next()* 方法获取服务的实例对象，代码如下：
 
 ```java
         public S next() {
@@ -326,4 +324,4 @@ private int parseLine(Class<?> service, URL u, BufferedReader r, int lc,
 
 1、本文详细说明了*SPI*的概念和*ServiceLoader*的具体用法，其使用包括**服务约定 -> 服务实现 -> 服务注册 -> 服务发现/使用**等过程
 
-2、通过代码分析，说明了*ServiceLoader*的底层实现，包括服务注册的懒加载机制、服务注册为什么固定目录以及服务使用时的*hasNext()*和*next()*方法等。
+2、通过代码分析，说明了*ServiceLoader*的底层实现，包括服务注册的懒加载机制、服务注册为什么固定目录以及服务使用时的  *hasNext()* 和 *next()* 方法等。

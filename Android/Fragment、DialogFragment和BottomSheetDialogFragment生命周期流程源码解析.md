@@ -4,166 +4,50 @@
 
 官方网上的Fragment声明周期。
 
-![image-20211022174424557](/Users/mtdp/Library/Application Support/typora-user-images/image-20211022174424557.png)	
+<img src="https://raw.githubusercontent.com/Aaron-DBJ/ImageRepo/img/20241217203031.png" title="" alt="" width="490">
 
-​	图 1 Fragment生命周期流程图
+​    图 1 Fragment生命周期流程图
 
 除了上述声明周期之外，也可以注册*FragmentLifecycleCallbacks*来插入更多*Fragment*状态的监听，具体有：
 
 ```java
 public abstract static class FragmentLifecycleCallbacks {
-        /**
-         * Called right before the fragment's {@link Fragment#onAttach(Context)} method is called.
-         * This is a good time to inject any required dependencies or perform other configuration
-         * for the fragment before any of the fragment's lifecycle methods are invoked.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         * @param context Context that the Fragment is being attached to
-         */
         public void onFragmentPreAttached(@NonNull FragmentManager fm, @NonNull Fragment f,
                 @NonNull Context context) {}
 
-        /**
-         * Called after the fragment has been attached to its host. Its host will have had
-         * <code>onAttachFragment</code> called before this call happens.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         * @param context Context that the Fragment was attached to
-         */
         public void onFragmentAttached(@NonNull FragmentManager fm, @NonNull Fragment f,
                 @NonNull Context context) {}
 
-        /**
-         * Called right before the fragment's {@link Fragment#onCreate(Bundle)} method is called.
-         * This is a good time to inject any required dependencies or perform other configuration
-         * for the fragment.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         * @param savedInstanceState Saved instance bundle from a previous instance
-         */
         public void onFragmentPreCreated(@NonNull FragmentManager fm, @NonNull Fragment f,
                 @Nullable Bundle savedInstanceState) {}
-
-        /**
-         * Called after the fragment has returned from the FragmentManager's call to
-         * {@link Fragment#onCreate(Bundle)}. This will only happen once for any given
-         * fragment instance, though the fragment may be attached and detached multiple times.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         * @param savedInstanceState Saved instance bundle from a previous instance
-         */
+        
         public void onFragmentCreated(@NonNull FragmentManager fm, @NonNull Fragment f,
                 @Nullable Bundle savedInstanceState) {}
 
-        /**
-         * Called after the fragment has returned from the FragmentManager's call to
-         * {@link Fragment#onActivityCreated(Bundle)}. This will only happen once for any given
-         * fragment instance, though the fragment may be attached and detached multiple times.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         * @param savedInstanceState Saved instance bundle from a previous instance
-         */
         public void onFragmentActivityCreated(@NonNull FragmentManager fm, @NonNull Fragment f,
                 @Nullable Bundle savedInstanceState) {}
 
-        /**
-         * Called after the fragment has returned a non-null view from the FragmentManager's
-         * request to {@link Fragment#onCreateView(LayoutInflater, ViewGroup, Bundle)}.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment that created and owns the view
-         * @param v View returned by the fragment
-         * @param savedInstanceState Saved instance bundle from a previous instance
-         */
         public void onFragmentViewCreated(@NonNull FragmentManager fm, @NonNull Fragment f,
                 @NonNull View v, @Nullable Bundle savedInstanceState) {}
 
-        /**
-         * Called after the fragment has returned from the FragmentManager's call to
-         * {@link Fragment#onStart()}.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         */
         public void onFragmentStarted(@NonNull FragmentManager fm, @NonNull Fragment f) {}
 
-        /**
-         * Called after the fragment has returned from the FragmentManager's call to
-         * {@link Fragment#onResume()}.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         */
         public void onFragmentResumed(@NonNull FragmentManager fm, @NonNull Fragment f) {}
 
-        /**
-         * Called after the fragment has returned from the FragmentManager's call to
-         * {@link Fragment#onPause()}.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         */
         public void onFragmentPaused(@NonNull FragmentManager fm, @NonNull Fragment f) {}
 
-        /**
-         * Called after the fragment has returned from the FragmentManager's call to
-         * {@link Fragment#onStop()}.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         */
         public void onFragmentStopped(@NonNull FragmentManager fm, @NonNull Fragment f) {}
 
-        /**
-         * Called after the fragment has returned from the FragmentManager's call to
-         * {@link Fragment#onSaveInstanceState(Bundle)}.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         * @param outState Saved state bundle for the fragment
-         */
         public void onFragmentSaveInstanceState(@NonNull FragmentManager fm, @NonNull Fragment f,
                 @NonNull Bundle outState) {}
-
-        /**
-         * Called after the fragment has returned from the FragmentManager's call to
-         * {@link Fragment#onDestroyView()}.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         */
+        
         public void onFragmentViewDestroyed(@NonNull FragmentManager fm, @NonNull Fragment f) {}
 
-        /**
-         * Called after the fragment has returned from the FragmentManager's call to
-         * {@link Fragment#onDestroy()}.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         */
         public void onFragmentDestroyed(@NonNull FragmentManager fm, @NonNull Fragment f) {}
 
-        /**
-         * Called after the fragment has returned from the FragmentManager's call to
-         * {@link Fragment#onDetach()}.
-         *
-         * @param fm Host FragmentManager
-         * @param f Fragment changing state
-         */
         public void onFragmentDetached(@NonNull FragmentManager fm, @NonNull Fragment f) {}
     }
 ```
-
-所以，如果考虑开发中自己注册的状态变化监听，那么其方法调用过程如下图
-
-![image-20211022182154551](/Users/mtdp/Library/Application Support/typora-user-images/image-20211022182154551.png)
-
-​											图 2 Fragment生命周期及FragmentLifecycleCallbacks流程图
 
 ## 1.2 生命周期执行顺序源码解析
 
@@ -184,7 +68,7 @@ getSupportFragmentManager.beginTransaction().add(R.id.xxx, fragment).commit();
 
 这里已add()方法为例，看下代码实现
 
-```
+```java
 // FragmentTransaction.java
 ......
 /**
@@ -192,8 +76,8 @@ getSupportFragmentManager.beginTransaction().add(R.id.xxx, fragment).commit();
 */
 @NonNull
 public FragmentTransaction add(@NonNull Fragment fragment, @Nullable String tag)  {
-	doAddOp(0, fragment, tag, OP_ADD);
-	return this;
+    doAddOp(0, fragment, tag, OP_ADD);
+    return this;
 }
 ...... 
 void doAddOp(int containerViewId, Fragment fragment, @Nullable String tag, int opcmd) {
@@ -244,27 +128,27 @@ void addOp(Op op) {
 
  @Override
 public int commit() {
-	return commitInternal(false);
+    return commitInternal(false);
 }
 
 int commitInternal(boolean allowStateLoss) {
-	if (mCommitted) throw new IllegalStateException("commit already called");
-	if (FragmentManagerImpl.DEBUG) {
-		Log.v(TAG, "Commit: " + this);
-		LogWriter logw = new LogWriter(TAG);
-		PrintWriter pw = new PrintWriter(logw);
-		dump("  ", pw);
-		pw.close();	
+    if (mCommitted) throw new IllegalStateException("commit already called");
+    if (FragmentManagerImpl.DEBUG) {
+        Log.v(TAG, "Commit: " + this);
+        LogWriter logw = new LogWriter(TAG);
+        PrintWriter pw = new PrintWriter(logw);
+        dump("  ", pw);
+        pw.close();    
   }
-	mCommitted = true;
-	if (mAddToBackStack) {
-		mIndex = mManager.allocBackStackIndex(this);
-	} else {
-		mIndex = -1;
-	}
+    mCommitted = true;
+    if (mAddToBackStack) {
+        mIndex = mManager.allocBackStackIndex(this);
+    } else {
+        mIndex = -1;
+    }
   // ① 
-	mManager.enqueueAction(this, allowStateLoss);
-	return mIndex;
+    mManager.enqueueAction(this, allowStateLoss);
+    return mIndex;
 }
 ```
 
@@ -273,9 +157,9 @@ int commitInternal(boolean allowStateLoss) {
 继续深入查看代码，*mManager*是*FragmentManagerImpl*对象，执行它的*enqueueAction*()方法。
 
 ```java
- 		// FragmentManagerImpl.java
+         // FragmentManagerImpl.java
 
-		/**
+        /**
      * Adds an action to the queue of pending actions.
      *
      * @param action the action to add
@@ -303,7 +187,7 @@ int commitInternal(boolean allowStateLoss) {
         }
     }
 
-		/**
+        /**
      * Schedules the execution when one hasn't been scheduled already. This should happen
      * the first time {@link #enqueueAction(OpGenerator, boolean)} is called or when
      * a postponed transaction has been started with
@@ -314,25 +198,25 @@ int commitInternal(boolean allowStateLoss) {
         synchronized (this) {
             boolean postponeReady =
                     mPostponedTransactions != null && !mPostponedTransactions.isEmpty();
-          	// ③
+              // ③
             boolean pendingReady = mPendingActions != null && mPendingActions.size() == 1;
             if (postponeReady || pendingReady) {
                 mHost.getHandler().removeCallbacks(mExecCommit);
-              	// ④
+                  // ④
                 mHost.getHandler().post(mExecCommit);
                 updateOnBackPressedCallbackEnabled();
             }
         }
     }
 
-		Runnable mExecCommit = new Runnable() {
+        Runnable mExecCommit = new Runnable() {
         @Override
         public void run() {
             execPendingActions();
         }
     };
 
-		/**
+        /**
      * Only call from main thread!
      */
     public boolean execPendingActions() {
@@ -356,7 +240,7 @@ int commitInternal(boolean allowStateLoss) {
         return didSomething;
     }
 
-		private void removeRedundantOperationsAndExecute(ArrayList<BackStackRecord> records,
+        private void removeRedundantOperationsAndExecute(ArrayList<BackStackRecord> records,
                                                      ArrayList<Boolean> isRecordPop) {
        ......
         // Force start of any postponed transactions that interact with scheduled transactions:
@@ -381,7 +265,7 @@ int commitInternal(boolean allowStateLoss) {
                         reorderingEnd++;
                     }
                 }
-              	// ⑤
+                  // ⑤
                 executeOpsTogether(records, isRecordPop, recordNum, reorderingEnd);
                 startIndex = reorderingEnd;
                 recordNum = reorderingEnd - 1;
@@ -392,7 +276,7 @@ int commitInternal(boolean allowStateLoss) {
         }
     }
 
-	private void executeOpsTogether(ArrayList<BackStackRecord> records,
+    private void executeOpsTogether(ArrayList<BackStackRecord> records,
                                     ArrayList<Boolean> isRecordPop, int startIndex, int endIndex) {
         ......
         if (!allowReordering) {
@@ -416,7 +300,7 @@ int commitInternal(boolean allowStateLoss) {
         }
     }
 
-		private static void executeOps(ArrayList<BackStackRecord> records,
+        private static void executeOps(ArrayList<BackStackRecord> records,
                                    ArrayList<Boolean> isRecordPop, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             final BackStackRecord record = records.get(i);
@@ -435,9 +319,9 @@ int commitInternal(boolean allowStateLoss) {
     }
 ```
 
-②：首先初始化*mPendingActions，*并将事件添加到*mPendingActions*列表中。然后执行 *scheduleCommit()。*
+②：首先初始化*mPendingActions*，并将事件添加到*mPendingActions*列表中。然后执行 *scheduleCommit()。*
 
-③：在*scheduleCommit*方法中，由于*mPendingActions*已经初始化过，且大小为1。*pendingReady*标记位为*true，*所以执行步骤④
+③：在*scheduleCommit*方法中，由于*mPendingActions*已经初始化过，且大小为1。*pendingReady*标记位为*true*。所以执行步骤④
 
 ④：通过Handler发送添加*Fragment*的执行事件，开始创建*Fragment*对象，执行各生命周期方法等。
 
@@ -456,7 +340,7 @@ void executeOps() {
             switch (op.mCmd) {
                 case OP_ADD:
                     f.setNextAnim(op.mEnterAnim);
-                		// ⑥
+                        // ⑥
                     mManager.addFragment(f, false);
                     break;
                 case OP_REMOVE:
@@ -503,7 +387,7 @@ void executeOps() {
     }
 ```
 
-⑥：还记得在调用add方法时，将*OP_ADD*指令保存了下来，所以这里在会调用 *mManager.addFragment(f, false)，*该方法主要做一些状态和标记位的设置。
+⑥：还记得在调用add方法时，将*OP_ADD*指令保存了下来，所以这里在会调用 *mManager.addFragment(f, false)* 该方法主要做一些状态和标记位的设置。
 
 ```java
 // FragmentManagerImpl.java
@@ -598,7 +482,7 @@ public void addFragment(Fragment fragment, boolean moveToStateNow) {
                 nextState = Math.min(nextState, Fragment.INITIALIZING);
             }
         }
-   			// ⑧
+               // ⑧
         moveToState(f, nextState, f.getNextTransition(), f.getNextTransitionStyle(), false);
         ......
     }
@@ -963,33 +847,27 @@ public void addFragment(Fragment fragment, boolean moveToStateNow) {
 
 查看*DialogFragment*的继承关系，其实它继承自*Fragment*，所以具备*Fragment*的特性和生命周期方法。同时，*DialogFragment*也具有一些*Dialog*的特点，反应在生命周期方法调用流程上就是，在*onCreateView*前，会调用*onCreateDialog*方法。
 
- ![image-20211022182038497](/Users/mtdp/Library/Application Support/typora-user-images/image-20211022182038497.png
-
-![image-20211022182118490](/Users/mtdp/Library/Application Support/typora-user-images/image-20211022182118490.png)
-
-​																图 3 DialogFragment生命周期流程图
-
 看下*Fragment*执行*onCreateView*的源码：
 
 ```java
-					void moveToState(Fragment f, int newState, int transit, int transitionStyle,
+                    void moveToState(Fragment f, int newState, int transit, int transitionStyle,
                      boolean keepActive) {
-       			......
+                   ......
             switch (f.mState) {
                 case Fragment.INITIALIZING:
-                    		......
+                            ......
                     // fall through
                 case Fragment.CREATED:
                     ......
 
                     if (newState > Fragment.CREATED) {
                         if (DEBUG) Log.v(TAG, "moveto ACTIVITY_CREATED: " + f);
-                        		......
+                                ......
                             f.mContainer = container;
-                      			// ⑩
+                                  // ⑩
                             f.performCreateView(f.performGetLayoutInflater(
                                     f.mSavedFragmentState), container, f.mSavedFragmentState);
-                           	......
+                               ......
                         }
 
                         f.performActivityCreated(f.mSavedFragmentState);
@@ -1061,20 +939,20 @@ LayoutInflater performGetLayoutInflater(@Nullable Bundle savedInstanceState) {
 *BottomSheetBehavior*使用还是比较简单，创建*BottomSheetBehavior*对象，和需要联动的View进行绑定即可。示例代码如下：
 
 ```java
-...... 				
+......                 
 mBehavior = BottomSheetBehavior.from((View) view.getParent());
 mBehavior.addBottomSheetCallback(bottomSheetCallback);
 mBehavior.setPeekHeight(ScreenUtils.getScreenHeight(getContext()));
 ......
 ```
 
-**注意**：*BottomSheetBehavior.from*方法要求传入的*View*的*LayoutParams*必须是*CoordinatorLayout*的*LayoutParams。*但这不意味着我们创建的*View*的根布局就必须是*CoordinatorLayout*，它会自动给我们包一层，这个下面会详述。
+**注意**：*BottomSheetBehavior.from*方法要求传入的*View*的*LayoutParams*必须是*CoordinatorLayout*的*LayoutParams*。但这不意味着我们创建的*View*的根布局就必须是*CoordinatorLayout*，它会自动给我们包一层，这个下面会详述。
 
 通过*BottomSheetBehavior*，我们可以添加一些滑动和*Fling*的监听事件，或者设置*BottomSheetDialogFragment*打开时的初始高度等。
 
 **问题：**
 
-1）调用*BottomSheetBehavior.from*方法时，传入的是*view.getParent()*，因为这个view的根布局不是*CoordinatorLayout，如果传入view，*会报异常
+1）调用*BottomSheetBehavior.from*方法时，传入的是*view.getParent()*，因为这个view的根布局不是*CoordinatorLayout*，如果传入*view*，会报异常
 
 ```java
 java.lang.IllegalArgumentException: The view is not a child of CoordinatorLayout
@@ -1088,22 +966,22 @@ java.lang.NullPointerException: Attempt to invoke virtual method 'android.view.V
         at com.google.android.material.bottomsheet.BottomSheetBehavior.from(BottomSheetBehavior.java:1632)
 ```
 
-说明此时我们的*view.getParent()*还没创建好，所以出现空指针。那么就需要确定下view.*getParent()*创建的时机。
+说明此时我们的*view.getParent()* 还没创建好，所以出现空指针。那么就需要确定下*view.getParent()* 创建的时机。
 
 **排查：**
 
 *BottomSheetDialogFragment*是*DialogFragment*的子类，那么会依次执行*DialogFragment*的生命周期方法，因此排查就是依次看下这些方法执行了什么逻辑。
 
-- 根据图3，在*onCreateDialog*方法新建了***BottomSheetDialog***对象，并且创建了*Dialog*的*window*对象以及设置了*WindowManager*对象。
+- 根据图3，在*onCreateDialog*方法新建了*BottomSheetDialog*对象，并且创建了*Dialog*的*window*对象以及设置了*WindowManager*对象。
 
 - *onCreateView*仅创建了*View*对象，*onViewCreated*是空方法，这2个方法看起来比较正常。
 
 - *onActivityCreated*给*Dialog*设置了需要展示的*View*和一些监听事件，代码如下
-
-  ```java
-  		// DialogFragment.java
   
-  		@Override
+  ```java
+          // DialogFragment.java
+  
+          @Override
       public void onActivityCreated(@Nullable Bundle savedInstanceState) {
           super.onActivityCreated(savedInstanceState);
   
@@ -1117,7 +995,7 @@ java.lang.NullPointerException: Attempt to invoke virtual method 'android.view.V
                   throw new IllegalStateException(
                           "DialogFragment can not be attached to a container view");
               }
-            	// ①
+                // ①
               mDialog.setContentView(view);
           }
           final Activity activity = getActivity();
@@ -1135,18 +1013,18 @@ java.lang.NullPointerException: Attempt to invoke virtual method 'android.view.V
           }
       }
   ```
-
-  ①：看下*Dialog*的*setContentView*方法，由于*BottomSheetDialogFragment*在*onCreateDialog*方法创建的是***BottomSheetDialog***对象，而***BottomSheetDialog***类有重写了*setContentView*方法，所以查看***BottomSheetDialog#setContentView***方法源码
-
+  
+  ①：看下*Dialog*的*setContentView*方法，由于*BottomSheetDialogFragment*在*onCreateDialog*方法创建的是*BottomSheetDialog*对象，而*BottomSheetDialog*类有重写了*setContentView*方法，所以查看*BottomSheetDialog#setContentView*方法源码
+  
   ```java
-  	// BottomSheetDialog.java
+      // BottomSheetDialog.java
   
    @Override
     public void setContentView(@LayoutRes int layoutResId) {
       super.setContentView(wrapInBottomSheet(layoutResId, null, null));
     }
-  	
-  	private View wrapInBottomSheet(
+  
+      private View wrapInBottomSheet(
         int layoutResId, @Nullable View view, @Nullable ViewGroup.LayoutParams params) {
       ensureContainerAndBehavior();
       CoordinatorLayout coordinator = (CoordinatorLayout) container.findViewById(R.id.coordinator);
@@ -1210,9 +1088,9 @@ java.lang.NullPointerException: Attempt to invoke virtual method 'android.view.V
       return container;
     }
   ```
-
-  ②：重点就在*wrapInBottomSheet*方法，虽然我们构造自己的*View*时没有使用*CoordinatorLayout*，但在该方法中，系统有个默认的布局文件*R.layout.design_bottom_sheet_dialog*（见下方代码）*，wrapInBottomSheet*方法就是将我们的布局添加到默认布局中(**id为design_bottom_sheet的FrameLayout**)*，*我们的布局的父视图就是*CoordinatorLayout*了，从而不必我们自己去设置*CoordinatorLayout*为根布局。
-
+  
+  ②：重点就在*wrapInBottomSheet*方法，虽然我们构造自己的*View*时没有使用*CoordinatorLayout*，但在该方法中，系统有个默认的布局文件*R.layout.design_bottom_sheet_dialog*（见下方代码）*，wrapInBottomSheet*方法就是将我们的布局添加到默认布局中(**id为design_bottom_sheet的FrameLayout**)，我们的布局的父视图就是*CoordinatorLayout*了，从而不必我们自己去设置*CoordinatorLayout*为根布局。
+  
   ```xml
   // R.layout.design_bottom_sheet_dialog
   
@@ -1270,6 +1148,7 @@ java.lang.NullPointerException: Attempt to invoke virtual method 'android.view.V
 
 **总结**
 
-1. 创建*BottomSheetBehavior*对象时，**如果传入的View参数不是某个*****CoordinatorLayout*****的直接子View，则需要在onActivityCreated生命周期方法之后创建**（如*onActivityCreated*、*onStart*等）**。**
+1. 创建*BottomSheetBehavior*对象时，**如果传入的View参数不是某个*CoordinatorLayout*的直接子View，则需要在onActivityCreated生命周期方法之后创建**（如*onActivityCreated*、*onStart*等）**。**
 2. 如果传入的*View*参数不是某个*CoordinatorLayout*的直接子*View*，还需要在布局文件中给其设置*layout_behavior*属性，否则会报「he view is not associated with BottomSheetBehavior」异常。
+
 

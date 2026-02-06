@@ -265,15 +265,20 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
   > 只有在你使用注解的地方引入了`annotationProcessor`，系统才会主动调用注解处理类`Processor`,才会最终生成如下的`.java`文件
   > ![](https://raw.githubusercontent.com/Aaron-DBJ/ImageRepo/img/20240524111719.png)
   >                                                         apt生成类.png
-  > 这里先简单总结一下： 
-  > 2.1、在完成注解处理类`Processor`之后，需要做2件事情：
-
-- **在META-INF目录下注册`Processor`**
-
-- **在项目中使用注解的地方添加apt工具`annotationProcessor`**
-  2.2、APT 4要素 
-  　　**注解处理器（AbstractProcess）+ 代码处理（javaPoet）+ 处理器注册（AutoService）+ apt（annotationProcessor）**
-  `APT(Annotation Processing Tool)总结` 
+  
+   这里先简单总结一下： 
+  
+  #### 2.1、在完成注解处理类`Processor`之后，需要做2件事情：
+  
+  - **在META-INF目录下注册`Processor`**
+  
+  - **在项目中使用注解的地方添加apt工具`annotationProcessor`**
+  
+  #### 2.2、APT 4要素
+  
+  **注解处理器（AbstractProcess）+ 代码处理（javaPoet）+ 处理器注册（AutoService）+ apt（annotationProcessor）**
+  
+  **APT(Annotation Processing Tool)总结**
   首先，APT是javac提供的一种工具，它在编译时扫描、解析、处理注解。它会对源代码文件进行检测，找出用户自定义的注解，根据注解、注解处理器和相应的apt工具自动生成代码。这段代码是根据用户编写的注解处理逻辑去生成的。**最终将生成的新的源文件与原来的源文件共同编译（注意：APT并不能对源文件进行修改操作，只能生成新的文件，例如往原来的类中添加方法）**。具体流程图如下图所示：  
   ![](https://raw.githubusercontent.com/Aaron-DBJ/ImageRepo/img/20240524111846.png)
                                                   apt工作流程.png
@@ -377,6 +382,8 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
   ```
   
   ## 注解处理器初始化
+  
+  > [JDK源码](https://github.com/openjdk/jdk8u/blob/master/langtools/src/share/classes/com/sun/tools/javac/processing/JavacProcessingEnvironment.java)
   
   终于在`JavaCompiler#compile`方法中找到了javac执行过程中对APT的处理。首先`initProcessAnnotations`方法实现了对APT的初始化。根据源码流程可知此时，该方法参数为要执行的注解处理器集合，当前其实被设置为`null`。
   那`initProcessAnnotations`方法中会怎么初始化我们的APT程序呢？实际上，在一开始我们说**APT程序就是Javac的小插件，由javac在编译时候根据条件调起！** 那么既然javac要调起APT中`AbstractProcessor`的process方法，而process方法是实例方法，自然需要先实现对APT中的`AbstractProcessor（Processor接口）`实现类class对象的加载。
@@ -694,3 +701,100 @@ ANR(Application Not responding)，是指应用程序未响应，Android系统对
 # SqlLite数据库性能优化
 
 [Sqlite简易性能优化方案，给你的应用插上“翅膀”最近对数据库进行了一番优化，**增加耗时统计，以及优化现有的sql语 - 掘金](https://juejin.cn/post/7173460152396300295)
+
+# AIDL
+
+## 1、包可见性
+
+android 11之后AIDL客户端启动服务时，必须在AndroidManifest文件中使用`<queries>`标签声明可以使用的服务端进程名称，如：
+
+```xml
+    <queries>
+        <package android:name="com.example.aidlserver"/>
+    </queries>
+```
+
+否则服务启动失败。
+
+## 2、开启服务
+
+Android 5之后系统限制开启服务必须通过显式方式，如：
+
+```java
+Intent intent = new Intent(context, com.xxx.MyService.class);
+```
+
+但是对于AIDL这种跨进程场景（比如2个app），对于客服端没法访问到对应的服务类，还是只能隐式调用，有2种方式
+
+- 设置action和package
+
+- 设置ComponentName
+
+## 3、Binder死亡监听
+
+在IPC过程中，服务端进程可能因为各种原因意外挂掉，这种情况下，客户端再去调用服务端就会发生异常，所以客户端需要感知当前Binder连接情况，并做出处理。
+
+Android提供了`IBinder.DeathRecipient`接口来处理服务端挂掉的情况，通过重写该接口的`binderDied`方法，来做一些资源清理或重连的工作。`binderDied`会在连接断开时被系统调用
+
+使用流程：
+
+- 连接建立时，在`onServiceConnected`方法里通过`IBinder.linkToDeath`注册binder死亡监听。`linkToDeath`方法有2个参数，第一个是客户端实现的`IBinder.DeathRecipient`对象，另一个是flag，通常传0即可。
+
+- binder死亡时，系统会通知到`IBinder.DeathRecipient`的`binderDied`方法，在其中调用`IBinder.unlinkToDeath`解除监听。并且进行重连尝试。
+
+示例：
+
+```java
+// client
+ private final ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+            Log.d(TAG, "onServiceConnected: componentName = " + componentName + "; iBinder = " + iBinder);
+            msgManager = IMsgManager.Stub.asInterface(iBinder);
+            try {
+                if (msgManager == null) {
+                    Log.d(TAG, "onServiceConnected: msgManager is null");
+                    return;
+                }
+
+                processGuard = new ProcessGuard(iBinder, () -> {
+                    if (!bindService()) {
+                        // 重连未成功后，10s后再试一次
+                        bindView.postDelayed(() -> bindService(), 10 * 1000);
+                    }
+                });
+                iBinder.linkToDeath(processGuard, 0);
+                msgManager.registerReceiveListener(receiveMsgListener);
+            } catch (RemoteException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+
+// processguard
+
+ @Override
+    public void binderDied() {
+        Log.d(TAG, "binderDied: ---");
+        doDie();
+    }
+
+    @Override
+    public void binderDied(@NonNull IBinder who) {
+        Log.d(TAG, "binderDied: who is " + who);
+        doDie();
+    }
+
+    private void doDie() {
+        if (mBinder != null) {
+            Log.d(TAG, "binderDied: server died");
+            mBinder.unlinkToDeath(this, 0);
+            mBinder = null;
+        }
+
+        if (retryRunnable != null) {
+            retryRunnable.run();
+            Log.d(TAG, "doDie: 重连");
+        }
+    }
+```
